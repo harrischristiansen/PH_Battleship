@@ -2,7 +2,7 @@
 	@ Harris Christiansen (Harris@HarrisChristiansen.com)
 	2016-01-24
 	For: Purdue Hackers - Battleship
-	Python Server
+	Battleship Server - Written in Python
 '''
 
 import socket
@@ -10,6 +10,9 @@ import time
 from thread import start_new_thread
 import threading
 import random
+import setproctitle
+
+setproctitle.setproctitle("BattleshipServer")
 
 port = 23345
 
@@ -19,12 +22,17 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Make Address Reusable 
 s.listen(20)
 
 games = []
+players = []
+
+############################################ Battleship Game Logic ############################################
 
 class BattleshipGame(threading.Thread):
 	def __init__(self,p1,p2):
 		super(self.__class__, self).__init__()
-		self.p1 = p1
-		self.p2 = p2
+		self.p1Obj = p1
+		self.p2Obj = p2
+		self.p1 = p1[1]
+		self.p2 = p2[1]
 		self.p1Ships = [[0 for x in range(8)] for x in range(8)] 
 		self.p2Ships = [[0 for x in range(8)] for x in range(8)] 
 		self.p1Ready = 0
@@ -33,11 +41,20 @@ class BattleshipGame(threading.Thread):
 		self.gamePlaying = True
 
 	def sendMsg(self,msg):
-		self.p1.sendall(msg+"\n")
-		self.p2.sendall(msg+"\n")
+		try:
+			self.p1.sendall(msg+"\n")
+		except:
+			self.setClosed(self.p1)
+		try:
+			self.p2.sendall(msg+"\n")
+		except:
+			self.setClosed(self.p2)
 
 	def sendMsgP(self,p,msg):
-		p.sendall(msg+"\n")
+		try:
+			p.sendall(msg+"\n")
+		except:
+			self.setClosed(p)
 
 	def setReady(self,p):
 		if(p is self.p1):
@@ -45,22 +62,30 @@ class BattleshipGame(threading.Thread):
 		else:
 			self.p2Ready = 1
 
-	def setFail(self,p):
+	def setClosed(self,p):
+		global players
 		if(p is self.p1):
 			self.p1Ready = -1
-		else:
+			self.p1.close()
+			players.remove(self.p1Obj)
+			self.p1 = None
+		elif(p is self.p2):
 			self.p2Ready = -1
+			self.p2.close()
+			players.remove(self.p2Obj)
+			self.p2 = None
+		self.gamePlaying = False
+		self.playersConnected = False
 
 	def getCord(self,p):
-		data = p.recv(1024)
+		try:
+			data = p.recv(1024)
+		except:
+			print("Error Receiving Data, Ending Game")
+			self.setClosed(p)
+			return False
 		if not data: # Client Closed Connection
-			if(p is self.p1):
-				self.p1Ready = -1
-			else:
-				self.p2Ready = -1
-			self.gamePlaying = False
-			self.playersConnected = False
-
+			self.setClosed(p)
 			return False
 		try:
 			c = ord(data[0])-65
@@ -68,17 +93,13 @@ class BattleshipGame(threading.Thread):
 
 			if(c<0 or c>=8 or r<0 or r>=8):
 				self.sendMsgP(p,"Invalid Input - Out Of Bounds")
-				self.setFail(p)
-				self.gamePlaying = False
-				self.playersConnected = False
+				self.setClosed(p)
 				return False
 
 			return (c,r)
 		except ValueError:
 			self.sendMsgP(p,"Invalid Input - Parse Integer")
-			self.setFail(p)
-			self.gamePlaying = False
-			self.playersConnected = False
+			self.setClosed(p)
 			return False
 
 	def placeShip(self,p,c1,c2,ship):
@@ -104,13 +125,14 @@ class BattleshipGame(threading.Thread):
 			c1 = self.getCord(p)
 			c2 = self.getCord(p)
 
+			if(self.p1Ready==-1 or self.p1Ready==-1):
+				return False
+
 			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]+c2[0])+abs(c1[1]+c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
 				self.sendMsgP(p,"Invalid Input - Ship Cords")
-				self.setFail(p)
-				self.gamePlaying = False
-				self.playersConnected = False
+				self.setClosed(p)
 				return False
 
 		self.setReady(p)
@@ -127,6 +149,7 @@ class BattleshipGame(threading.Thread):
 					self.sendMsgP(p,"Hit")
 				else:
 					self.sendMsgP(p,"Sunk")
+				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
 			
@@ -138,14 +161,24 @@ class BattleshipGame(threading.Thread):
 					self.sendMsgP(p,"Hit")
 				else:
 					self.sendMsgP(p,"Sunk")
+				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
 
 		self.setReady(p)
 		return True
 
+	def checkGame(self):
+		if(self.gamePlaying):
+			if(max(max(l) for l in self.p1Ships) <= 0):
+				# Player 2 Won
+				self.gamePlaying = False
+			if(max(max(l) for l in self.p2Ships) <= 0):
+				# Player 1 Won
+				self.gamePlaying = False
+
 	def run(self):
-		global games
+		global games, players
 		games.append(self)
 
 		while self.playersConnected:
@@ -156,6 +189,7 @@ class BattleshipGame(threading.Thread):
 			start_new_thread(self.placeShips, (self.p2,))
 
 			while(self.p1Ready==0 or self.p2Ready==0):
+				time.sleep(0.003)
 				continue
 
 			if(self.p1Ready==-1 or self.p1Ready==-1):
@@ -167,26 +201,71 @@ class BattleshipGame(threading.Thread):
 				start_new_thread(self.placeMove, (self.p2,))
 
 				while(self.p1Ready==0 or self.p2Ready==0):
+					time.sleep(0.003)
 					continue
 
 				if(self.p1Ready==-1 or self.p1Ready==-1):
 					break
 
-
 		games.remove(self)
 		self.sendMsg("Closed")
-		self.p1.close()
-		self.p2.close()
+		if(self.p1 != None):
+			players.remove(self.p1Obj)
+			self.p1.close()
+		if(self.p2 != None):
+			players.remove(self.p2Obj)
+			self.p2.close()
+
+############################################ Web GUI Client ############################################
+
+
+############################################ Main Thread ############################################
+
+player1 = player2 = None
+
+def getPlayer1():
+	global player1, players
+	while player1==None:
+		p, addr = s.accept()
+		p.settimeout(10)
+		try:
+			userID = p.recv(1024)
+		except:
+			p.close()
+			continue
+
+		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+
+		player1 = (userID,p)
+		players.append(player1)
+
+def getPlayer2():
+	global player2, players
+	while player2==None:
+		p, addr = s.accept()
+		p.settimeout(10)
+		try:
+			userID = p.recv(1024)
+		except:
+			p.close()
+			continue
+
+		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+
+		player2 = (userID,p)
+		players.append(player2)
 
 while True:
-	# blocking call, waits to accept a connection
-	p1, addr = s.accept()
-	print "Client Connected: " + addr[0] + ":" + str(addr[1])
+	player1 = player2 = None
 
-	p2, addr = s.accept()
-	print "Client Connected: " + addr[0] + ":" + str(addr[1])
+	start_new_thread(getPlayer1,())
+	start_new_thread(getPlayer2,())
 
-	thread = BattleshipGame(p1,p2)
+	while(player1==None or player2==None):
+		time.sleep(0.1)
+		continue
+
+	thread = BattleshipGame(player1,player2)
 	thread.setDaemon(True) # Set as background thread
 	thread.start()
 
