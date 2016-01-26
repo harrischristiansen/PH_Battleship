@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use DB;
 use App\Http\Requests;
 use App\Http\Requests\LoggedInRequest;
 use App\Http\Controllers\Controller;
@@ -87,6 +87,23 @@ class BattleshipController extends Controller {
 		}
 		$team = Team::find($id);
 		return view('pages.team-detail',compact('team'));
+	}
+
+	public function getRankings(LoggedInRequest $request)
+	{
+		$rankings = DB::table('teams')
+                 ->select(DB::raw('*, (wins / games) as win_percent'))
+                 ->orderBy('win_percent','DESC')
+                 ->get();
+
+        $rankings=$array = json_decode(json_encode($rankings), true);
+                 // echo("<pre>");
+                 //  print_r($rankings);
+                 //  echo("<pre>");
+
+
+        return view('pages.rankings',compact('rankings'));
+
 	}
 
 

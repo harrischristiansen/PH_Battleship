@@ -1,25 +1,24 @@
 @extends("app")
 
 @section("content")
-<h1>Teams</h1>
+<h1>Rankings</h1>
 <table class="table table-bordered" >
 <thead>
   <tr>
-     <th>id</th>
-     <th>key</th>
      <th>name</th>
      <th>games</th>
      <th>wins</th>
+     <th>win percent</th>
      <th>edit, reset, delete</th>
   </tr>
 </thead>
-@foreach ($teams as $team)
+@foreach ($rankings as $team)
     <tr>
-    	<td>{{$team['id']}}</td>
-    	<td>{{$team['team_key']}}</td>
-    	<td>{{$team['abb']}}: {{$team['name']}}</td>
+<!--     	<td>{{$team['id']}}</td> -->
+        <td>{{$team['abb']}}: {{$team['name']}}</td>
     	<td>{{$team['games']}}</td>
     	<td>{{$team['wins']}}</td>
+        <td>{{$team['win_percent']*100}}%</td>
     	<td><a href="{{ URL::to('/edit-team', $team['id']) }}"> edit </a></td>
     </tr>
 @endforeach
