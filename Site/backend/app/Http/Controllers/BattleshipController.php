@@ -126,8 +126,5 @@ class BattleshipController extends Controller {
         }
         return $randomString;
     }
-
-
-
     
 }

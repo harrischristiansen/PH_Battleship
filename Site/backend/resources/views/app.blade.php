@@ -25,7 +25,7 @@
 	    <link rel="stylesheet" href="/css/battleship.css">
 
     </head>
-    <body>
+    <body {!! session()->get('loggedIn') == "true" ? 'style="padding-top: 51px;"':'' !!}>
 	    @if(session()->get('loggedIn') == "true")
 		<nav class="navbar navbar-inverse navbar-fixed-top">
 			<div class="container">
@@ -44,6 +44,7 @@
 						<li><a href="/edit-team">Edit Teams</a></li>
 						<li><a href="/rankings">Rankings</a></li>
 						<li><a href="/manage">Manage Tournament</a></li>
+						<li><a href="/game">Game Viewer</a></li>
 						<li><a href="/logout">Logout</a></li>
 					</ul>
 				</div>
@@ -51,7 +52,8 @@
 		</nav>
 		@endif
 		
-		<div class="container-fluid">
+		<div class="container-fluid" style="position: fixed; width: 100%; height: 100%;">
+			<br>
 			@if(session()->has('msg'))
 				<div class="alert alert-success" role="alert">{{session()->get('msg')}}</div>
 			@endif
