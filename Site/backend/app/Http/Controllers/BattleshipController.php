@@ -108,12 +108,12 @@ class BattleshipController extends Controller {
 
 	}
 
-	public static function generateRandomString($length = 6) {
+	public static function generateRandomString() {
         srand();
         $characters = '0123456789';
         $charactersLength = strlen($characters);
         $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < 16; $i++) {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
