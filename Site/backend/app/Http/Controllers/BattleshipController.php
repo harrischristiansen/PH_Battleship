@@ -52,17 +52,44 @@ class BattleshipController extends Controller {
 	}
 	
 	// Edit Team
-	public function postEditTeam(LoggedInRequest $request) {
-		$teamKey = $request->input('teamKey');
-		$team = Team::where('team_key',$teamKey)->first();
+	public function postEditTeam(LoggedInRequest $request, $teamID) {
+		// $teamKey = $request->input('teamKey');
+		$team = Team::findOrFail($teamID);
 		$team->name = $request->input('teamName');
 		$team->abb = $request->input('teamAbb');
-		$team->save();
+		if($request->input('delete')=="delete")
+		{
+			$team->delete();
+			$request->session()->flash('msg', 'Team '.$team->name.' deleted!');
+		}
+		else if($request->input('reset')=="reset")
+			{
+				$team->games=0;
+				$team->wins=0;
+				$request->session()->flash('msg', 'Team '.$team->name.' reset!');
+				$team->save();
+			}
+		else
+		{
+			$request->session()->flash('msg', 'Team '.$team->name.' updated!');
+			$team->save();
+		}
+			
+
+		
+		return $this->getEditTeam($request);
 	}
-	public function getEditTeam(LoggedInRequest $request) {
-		$teams = Team::all();
-		return view('pages.teams',compact('teams'));
+	public function getEditTeam(LoggedInRequest $request,$id=0) {
+		if($id==0)
+		{
+			$teams = Team::all();
+			return view('pages.teams',compact('teams'));
+		}
+		$team = Team::find($id);
+		return view('pages.team-detail',compact('team'));
 	}
+
+
 
     
 }

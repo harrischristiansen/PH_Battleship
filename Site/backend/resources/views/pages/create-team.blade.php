@@ -12,6 +12,6 @@
 		<input type="textfield" name="teamAbb" id="teamAbb" placeholder="teamAbb">
 		<br>
 		<input type="submit" value="Create Team">
-	</form>
+</form>
 
 @stop
