@@ -39,9 +39,9 @@ class BattleshipController extends Controller {
 	// Create Team
 	public function postCreateTeam(LoggedInRequest $request) {
 
-		$hash = self::generateRandomString();
+		$hash = self::generateRandomInt();
         while(Team::where('team_key',$hash)->first()!=null) {
-            $hash = self::generateRandomString();
+            $hash = self::generateRandomInt();
         }
 
 
@@ -108,7 +108,7 @@ class BattleshipController extends Controller {
 
 	}
 
-	public static function generateRandomString() {
+	public static function generateRandomInt() {
         srand();
         $characters = '0123456789';
         $charactersLength = strlen($characters);
