@@ -13,7 +13,7 @@ use App\Models\Team;
 class APIController extends Controller {
     
     public function getIndex() {
-		return view('welcome');
+		return view('pages.home');
 	}
 	
 	public function getAuth($teamKey) {

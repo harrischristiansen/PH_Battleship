@@ -1,0 +1,15 @@
+body {
+	padding-top: 50px;
+}
+.titlePage {
+	padding: 40px 15px;
+	text-align: center;
+	font-weight: 100;
+    font-family: 'Lato';
+}
+.titlePageTitle {
+	font-size: 108px;
+}
+.titlePageSub {
+	font-size: 75px;
+}

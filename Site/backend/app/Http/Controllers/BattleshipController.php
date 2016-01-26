@@ -13,7 +13,7 @@ use App\Models\Team;
 class BattleshipController extends Controller {
     
     public function getIndex() {
-		return view('welcome');
+		return view('pages.home');
 	}
 	
 	public function getLogin() {
@@ -26,6 +26,12 @@ class BattleshipController extends Controller {
 		if($password == env('SITE_PASS')) {
 			$request->session()->put('loggedIn', 'true');
 		}
+
+		return $this->getIndex();
+	}
+
+	public function getLogout(Request $request) {
+		$request->session()->put('loggedIn', 'false');
 
 		return $this->getIndex();
 	}
