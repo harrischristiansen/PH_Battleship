@@ -1,6 +1,16 @@
+/*
+	@ Harris Christiansen (Harris@HarrisChristiansen.com)
+	2016-01-25
+	For: Purdue Hackers - Battleship
+	Battleship Admin
+*/
+
 body {
 	padding-top: 50px;
 }
+
+/* ------------------------ Title Page ------------------------- */
+
 .titlePage {
 	padding: 40px 15px;
 	text-align: center;
