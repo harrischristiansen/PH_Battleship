@@ -10,9 +10,6 @@ import time
 from thread import start_new_thread
 import threading
 import random
-import setproctitle
-
-setproctitle.setproctitle("BattleshipServer")
 
 port = 23345
 
@@ -208,12 +205,13 @@ class BattleshipGame(threading.Thread):
 					break
 
 		games.remove(self)
-		self.sendMsg("Closed")
 		if(self.p1 != None):
 			players.remove(self.p1Obj)
+			self.sendMsgP(self.p1,"Closed")
 			self.p1.close()
 		if(self.p2 != None):
 			players.remove(self.p2Obj)
+			self.sendMsgP(self.p2,"Closed")
 			self.p2.close()
 
 ############################################ Web GUI Client ############################################
@@ -227,7 +225,7 @@ def getPlayer1():
 	global player1, players
 	while player1==None:
 		p, addr = s.accept()
-		p.settimeout(10)
+		p.settimeout(100) # TODO: Set to 10
 		try:
 			userID = p.recv(1024)
 		except:
@@ -243,7 +241,7 @@ def getPlayer2():
 	global player2, players
 	while player2==None:
 		p, addr = s.accept()
-		p.settimeout(10)
+		p.settimeout(100) # TODO: Set to 10
 		try:
 			userID = p.recv(1024)
 		except:
