@@ -38,8 +38,15 @@ class BattleshipController extends Controller {
 	
 	// Create Team
 	public function postCreateTeam(LoggedInRequest $request) {
+
+		$hash = self::generateRandomString();
+        while(Team::where('team_key',$hash)->first()!=null) {
+            $hash = self::generateRandomString();
+        }
+
+
 		$team = new Team;
-		$team->team_key = $request->input('teamKey');
+		$team->team_key = $hash;
 		$team->name = $request->input('teamName');
 		$team->abb = $request->input('teamAbb');
 		$team->save();
@@ -97,14 +104,20 @@ class BattleshipController extends Controller {
                  ->get();
 
         $rankings=$array = json_decode(json_encode($rankings), true);
-                 // echo("<pre>");
-                 //  print_r($rankings);
-                 //  echo("<pre>");
-
-
         return view('pages.rankings',compact('rankings'));
 
 	}
+
+	public static function generateRandomString($length = 6) {
+        srand();
+        $characters = '0123456789';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
 
 
 
