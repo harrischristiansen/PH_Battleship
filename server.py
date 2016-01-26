@@ -37,6 +37,7 @@ class BattleshipGame(threading.Thread):
 		self.p2Ready = 0
 		self.playersConnected = True
 		self.gamePlaying = True
+		self.listeners = []
 
 	def sendMsg(self,msg):
 		try:
@@ -61,17 +62,18 @@ class BattleshipGame(threading.Thread):
 			self.p2Ready = 1
 
 	def setClosed(self,p):
-		global players
-		if(p is self.p1):
+		if(self.p1 != None):
 			self.p1Ready = -1
 			self.p1.close()
 			players.remove(self.p1Obj)
 			self.p1 = None
-		elif(p is self.p2):
+	
+		if(self.p2 != None):
 			self.p2Ready = -1
 			self.p2.close()
 			players.remove(self.p2Obj)
 			self.p2 = None
+
 		self.gamePlaying = False
 		self.playersConnected = False
 
@@ -79,10 +81,11 @@ class BattleshipGame(threading.Thread):
 		try:
 			data = p.recv(1024)
 		except:
-			print("Error Receiving Data, Ending Game")
+			print("Error Receiving Coord, Ending Game")
 			self.setClosed(p)
 			return False
-		if not data: # Client Closed Connection
+
+		if not isinstance(data,(str)): # Client Closed Connection
 			self.setClosed(p)
 			return False
 		try:
@@ -120,15 +123,22 @@ class BattleshipGame(threading.Thread):
 
 		for ship in ships:
 			self.sendMsgP(p,ship[0]+"("+(str)(ship[1])+"):")
-			c1 = self.getCord(p)
-			c2 = self.getCord(p)
-
-			if(self.p1Ready==-1 or self.p1Ready==-1):
+			if(self.p1Ready==-1 or self.p2Ready==-1):
 				return False
 
-			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]+c2[0])+abs(c1[1]+c2[1])+1)==ship[1]):
+			c1 = self.getCord(p)
+			if(self.p1Ready==-1 or self.p2Ready==-1):
+				return False
+
+			c2 = self.getCord(p)
+			if(self.p1Ready==-1 or self.p2Ready==-1):
+				return False
+
+			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]-c2[0])+abs(c1[1]-c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
+				print c1
+				print c2
 				self.sendMsgP(p,"Invalid Input - Ship Cords")
 				self.setClosed(p)
 				return False
@@ -140,6 +150,8 @@ class BattleshipGame(threading.Thread):
 		self.sendMsgP(p,"Enter Coordinates")
 		c1 = self.getCord(p)
 		if(p is self.p1):
+			for listener in self.listeners:
+				listener.sendMsg(self.p1Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
 			hit = self.p2Ships[c1[0]][c1[1]]
 			if(hit > 0):
 				self.p2Ships[c1[0]][c1[1]] = 0 - hit
@@ -152,6 +164,8 @@ class BattleshipGame(threading.Thread):
 				self.sendMsgP(p,"Miss")
 			
 		else:
+			for listener in self.listeners:
+				listener.sendMsg(self.p2Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
 			hit = self.p1Ships[c1[0]][c1[1]]
 			if(hit > 0):
 				self.p1Ships[c1[0]][c1[1]] = 0 - hit
@@ -180,8 +194,8 @@ class BattleshipGame(threading.Thread):
 		games.append(self)
 
 		while self.playersConnected:
-			self.sendMsg("Welcome To Battleship! Place your ships!")
 			self.p1Ready=self.p2Ready=0
+			self.sendMsg("Welcome To Battleship! Place your ships!")
 			self.gamePlaying = True
 			start_new_thread(self.placeShips, (self.p1,))
 			start_new_thread(self.placeShips, (self.p2,))
@@ -190,8 +204,11 @@ class BattleshipGame(threading.Thread):
 				time.sleep(0.003)
 				continue
 
-			if(self.p1Ready==-1 or self.p1Ready==-1):
+			if(self.p1Ready==-1 or self.p2Ready==-1):
 				break
+
+			for listener in self.listeners: # Tell GameViewers to rejoin to get correct map
+				listener.sendMsg("rejoin")
 
 			while self.gamePlaying:
 				self.p1Ready=self.p2Ready=0
@@ -202,18 +219,11 @@ class BattleshipGame(threading.Thread):
 					time.sleep(0.003)
 					continue
 
-				if(self.p1Ready==-1 or self.p1Ready==-1):
+				if(self.p1Ready==-1 or self.p2Ready==-1):
 					break
 
+		print "Game Ended"
 		games.remove(self)
-		if(self.p1 != None):
-			players.remove(self.p1Obj)
-			self.sendMsgP(self.p1,"Closed")
-			self.p1.close()
-		if(self.p2 != None):
-			players.remove(self.p2Obj)
-			self.sendMsgP(self.p2,"Closed")
-			self.p2.close()
 
 ############################################ Web GUI Client ############################################
 
@@ -222,6 +232,8 @@ class GameViewer(threading.Thread):
 		super(self.__class__, self).__init__()
 		self.c = c
 		self.currentGame = -1
+	def sendMsg(self,msg):
+		self.c.sendall(msg+"\n")
 	def run(self):
 		while True:
 			try:
@@ -229,19 +241,34 @@ class GameViewer(threading.Thread):
 			except:
 				continue
 
+			if not data: # Client Closed Connection
+				self.c.close()
+				for game in games:
+					if(game._Thread__ident == self.currentGame):
+						game.listeners.remove(self)
+				return False
+
 			if "games" in data:
 				gameIDs = []
 				for game in games:
 					gameIDs.append(game._Thread__ident)
 
 				self.c.sendall(json.dumps(gameIDs)+"\n");
+
 			elif "join" in data:
+				# Remove Current Listener
+				for game in games:
+					if(game._Thread__ident == self.currentGame):
+						game.listeners.remove(self)
+						break
+
 				self.currentGame = int(data.split()[1])
 				for game in games:
 					if(game._Thread__ident == self.currentGame):
-						break;
-
-				self.c.sendall(json.dumps([game.p1Ships,game.p2Ships]))
+						game.listeners.append(self)
+						self.c.sendall(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships])+"\n")
+						break
+				
 
 ############################################ Main Thread ############################################
 
@@ -253,7 +280,11 @@ def getPlayer1():
 		p, addr = s.accept()
 		p.settimeout(100) # TODO: Set to 10
 		try:
-			userID = p.recv(1024).strip("\r\n ")
+			userID = p.recv(1024)
+			if not userID: # Client Closed Connection
+				p.close()
+				continue
+			userID = userID.strip("\r\n ")
 		except:
 			p.close()
 			continue
@@ -268,6 +299,7 @@ def getPlayer1():
 
 		player1 = (userID,p)
 		players.append(player1)
+		break
 
 def getPlayer2():
 	global player2, players
@@ -275,7 +307,11 @@ def getPlayer2():
 		p, addr = s.accept()
 		p.settimeout(100) # TODO: Set to 10
 		try:
-			userID = p.recv(1024).strip("\r\n ")
+			userID = p.recv(1024)
+			if not userID: # Client Closed Connection
+				p.close()
+				continue
+			userID = userID.strip("\r\n ")
 		except:
 			p.close()
 			continue
@@ -290,6 +326,7 @@ def getPlayer2():
 
 		player2 = (userID,p)
 		players.append(player2)
+		break
 
 while True:
 	player1 = player2 = None
