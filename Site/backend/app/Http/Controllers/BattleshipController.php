@@ -107,7 +107,15 @@ class BattleshipController extends Controller {
         return view('pages.rankings',compact('rankings'));
 
 	}
+	
+	/////////////////////////////// Game Viewer ///////////////////////////////
+	
+	public function getGame() {
+		return view('pages.game');
+	}
 
+	/////////////////////////////// Helper Functions ///////////////////////////////
+	
 	public static function generateRandomInt() {
         srand();
         $characters = '0123456789';
