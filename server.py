@@ -10,6 +10,7 @@ import time
 from thread import start_new_thread
 import threading
 import random
+import json
 
 port = 23345
 
@@ -216,6 +217,31 @@ class BattleshipGame(threading.Thread):
 
 ############################################ Web GUI Client ############################################
 
+class GameViewer(threading.Thread):
+	def __init__(self,c):
+		super(self.__class__, self).__init__()
+		self.c = c
+		self.currentGame = -1
+	def run(self):
+		while True:
+			try:
+				data = self.c.recv(1024)
+			except:
+				continue
+
+			if "games" in data:
+				gameIDs = []
+				for game in games:
+					gameIDs.append(game._Thread__ident)
+
+				self.c.sendall(json.dumps(gameIDs)+"\n");
+			elif "join" in data:
+				self.currentGame = int(data.split()[1])
+				for game in games:
+					if(game._Thread__ident == self.currentGame):
+						break;
+
+				self.c.sendall(json.dumps([game.p1Ships,game.p2Ships]))
 
 ############################################ Main Thread ############################################
 
@@ -227,9 +253,15 @@ def getPlayer1():
 		p, addr = s.accept()
 		p.settimeout(100) # TODO: Set to 10
 		try:
-			userID = p.recv(1024)
+			userID = p.recv(1024).strip("\r\n ")
 		except:
 			p.close()
+			continue
+
+		if("GameViewer" in userID):
+			thread = GameViewer(p)
+			thread.setDaemon(True) # Set as background thread
+			thread.start()
 			continue
 
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
@@ -243,9 +275,15 @@ def getPlayer2():
 		p, addr = s.accept()
 		p.settimeout(100) # TODO: Set to 10
 		try:
-			userID = p.recv(1024)
+			userID = p.recv(1024).strip("\r\n ")
 		except:
 			p.close()
+			continue
+
+		if("GameViewer" in userID):
+			thread = GameViewer(p)
+			thread.setDaemon(True) # Set as background thread
+			thread.start()
 			continue
 
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
