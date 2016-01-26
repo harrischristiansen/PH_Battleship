@@ -39,6 +39,11 @@
         <div class="container">
             <div class="content">
                 <div class="title">Purdue Hackers Battleship</div>
+                <form method="post" action="/login">
+					{!! csrf_field() !!}
+					<input type="password" name="password" id="password" placeholder="Password">
+					<input type="submit" value="Sign In">
+				</form>
             </div>
         </div>
     </body>

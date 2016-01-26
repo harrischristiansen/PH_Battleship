@@ -1,5 +1,6 @@
 <?php
 
-Route::get('/', function () { return view('welcome'); });
-	
-Route::controller('api', 'BattleshipController');
+Route::group(['middleware' => ['web']], function () {
+	Route::controller('api', 'APIController');
+    Route::controller('/', 'BattleshipController');
+});
