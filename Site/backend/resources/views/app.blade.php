@@ -52,7 +52,9 @@
 		@endif
 		
 		<div class="container">
-			<pre>{{session()->get('msg')}}</pre>
+			@if(session()->has('msg'))
+				<div class="alert alert-success" role="alert">{{session()->get('msg')}}</div>
+			@endif
 			@yield('content')
 		</div>
 		

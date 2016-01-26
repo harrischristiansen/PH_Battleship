@@ -1,15 +1,19 @@
 @extends("app")
 
 @section("content")
-<h1>Create Team</h1>
 
-<form method="post" action="/create-team">
+<div class="panel panel-default">
+	<div class="panel-heading">
+    	<h3 class="panel-title">Create Team</h3>
+	</div>
+	<form method="post" action="/create-team" class="panel-body">
 		{!! csrf_field() !!}
-		<input type="textfield" name="teamName" id="teamName" placeholder="teamName">
+		<input type="text" name="teamName" id="teamName" placeholder="Team Name" class="form-control">
 		<br>
-		<input type="textfield" name="teamAbb" id="teamAbb" placeholder="teamAbb">
+		<input type="text" name="teamAbb" id="teamAbb" placeholder="Team Abbreviation" class="form-control">
 		<br>
-		<input type="submit" value="Create Team">
-</form>
+		<input type="submit" value="Create Team" class="btn btn-primary">
+	</form>
+</div>
 
 @stop
