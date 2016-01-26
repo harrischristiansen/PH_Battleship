@@ -121,7 +121,7 @@ class BattleshipController extends Controller {
         $characters = '0123456789';
         $charactersLength = strlen($characters);
         $randomString = '';
-        for ($i = 0; $i < 16; $i++) {
+        for ($i = 0; $i < 9; $i++) {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
