@@ -52,7 +52,7 @@
 		</nav>
 		@endif
 		
-		<div class="container-fluid" style="position: fixed; width: 100%; height: 100%;">
+		<div class="container-fluid mainContentContainer">
 			<br>
 			@if(session()->has('msg'))
 				<div class="alert alert-success" role="alert">{{session()->get('msg')}}</div>
@@ -66,5 +66,7 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<!-- Bootstrap JS -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+		<!-- Page Specific JS -->
+		@yield('customJS')
     </body>
 </html>

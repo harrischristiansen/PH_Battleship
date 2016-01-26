@@ -5,6 +5,12 @@
 	Battleship Admin
 */
 
+.mainContentContainer {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+}
+
 /* ------------------------ Title Page ------------------------- */
 
 .titlePage {
@@ -74,3 +80,6 @@
   color: #fff;
   background-color: #428bca;
 }
+
+/* ------------------------ Game Viewer ------------------------- */
+

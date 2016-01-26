@@ -1,5 +1,9 @@
 @extends("app")
 
+@section("customJS")
+<script src="/js/Battleship.js"></script>
+@stop
+
 @section("content")
 
 <div class="col-sm-3 col-md-2 sidebar">
@@ -25,6 +29,7 @@
 		<li><a href="#">Game 19</a></li>
 		<li><a href="#">Game 20</a></li>
 	</ul>
+	<br>
 </div>
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
