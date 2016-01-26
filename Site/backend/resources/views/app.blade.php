@@ -10,7 +10,7 @@
         <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
         
         <!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		
 		<!-- Bootstrap Optional theme -->
 		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
@@ -40,8 +40,8 @@
 				</div>
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
-						<li><a href="/create_team">Add Team</a></li>
-						<li><a href="/edit_teams">Edit Teams</a></li>
+						<li><a href="/create-team">Add Team</a></li>
+						<li><a href="/edit-team">Edit Teams</a></li>
 						<li><a href="/rankings">Rankings</a></li>
 						<li><a href="/manage">Manage Tournament</a></li>
 						<li><a href="/logout">Logout</a></li>
@@ -52,6 +52,7 @@
 		@endif
 		
 		<div class="container">
+			<pre>{{session()->get('msg')}}</pre>
 			@yield('content')
 		</div>
 		

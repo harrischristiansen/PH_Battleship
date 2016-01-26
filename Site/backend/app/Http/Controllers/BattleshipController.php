@@ -43,6 +43,12 @@ class BattleshipController extends Controller {
 		$team->name = $request->input('teamName');
 		$team->abb = $request->input('teamAbb');
 		$team->save();
+		$request->session()->flash('msg', 'Team '.$team->name.' created!');
+		return $this->getEditTeam($request);
+	}
+
+	public function getCreateTeam(LoggedInRequest $request) {
+		return view('pages.create-team');
 	}
 	
 	// Edit Team
@@ -53,5 +59,10 @@ class BattleshipController extends Controller {
 		$team->abb = $request->input('teamAbb');
 		$team->save();
 	}
+	public function getEditTeam(LoggedInRequest $request) {
+		$teams = Team::all();
+		return view('pages.teams',compact('teams'));
+	}
+
     
 }
