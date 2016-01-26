@@ -51,9 +51,7 @@
 		</nav>
 		@endif
 		
-		@yield('sideBar')
-		
-		<div class="container">
+		<div class="container-fluid">
 			@if(session()->has('msg'))
 				<div class="alert alert-success" role="alert">{{session()->get('msg')}}</div>
 			@endif
