@@ -38,6 +38,7 @@ class BattleshipGame(threading.Thread):
 		self.playersConnected = True
 		self.gamePlaying = True
 		self.listeners = []
+		self.delayLength = 0.001
 
 	def sendMsg(self,msg):
 		try:
@@ -80,8 +81,8 @@ class BattleshipGame(threading.Thread):
 	def getCord(self,p):
 		try:
 			data = p.recv(1024)
-		except:
-			print("Error Receiving Coord, Ending Game")
+		except: # Timeout
+			print("Error: Timeout Receiving Coord, Ending Game")
 			self.setClosed(p)
 			return False
 
@@ -93,13 +94,13 @@ class BattleshipGame(threading.Thread):
 			r = int(data[1])
 
 			if(c<0 or c>=8 or r<0 or r>=8):
-				self.sendMsgP(p,"Invalid Input - Out Of Bounds")
+				self.sendMsgP(p,"Error: Invalid Input - Out Of Bounds")
 				self.setClosed(p)
 				return False
 
 			return (c,r)
 		except ValueError:
-			self.sendMsgP(p,"Invalid Input - Parse Integer")
+			self.sendMsgP(p,"Error: Invalid Input - Parse Integer")
 			self.setClosed(p)
 			return False
 
@@ -139,7 +140,7 @@ class BattleshipGame(threading.Thread):
 			else:
 				print c1
 				print c2
-				self.sendMsgP(p,"Invalid Input - Ship Cords")
+				self.sendMsgP(p,"Error: Invalid Input - Ship Cords")
 				self.setClosed(p)
 				return False
 
@@ -211,6 +212,7 @@ class BattleshipGame(threading.Thread):
 				listener.sendMsg("rejoin")
 
 			while self.gamePlaying:
+				time.sleep(self.delayLength) # Adjustable Move Delay Length
 				self.p1Ready=self.p2Ready=0
 				start_new_thread(self.placeMove, (self.p1,))
 				start_new_thread(self.placeMove, (self.p2,))
@@ -238,7 +240,7 @@ class GameViewer(threading.Thread):
 		while True:
 			try:
 				data = self.c.recv(1024)
-			except:
+			except: # Timeout
 				continue
 
 			if not data: # Client Closed Connection
@@ -267,6 +269,12 @@ class GameViewer(threading.Thread):
 					if(game._Thread__ident == self.currentGame):
 						game.listeners.append(self)
 						self.c.sendall(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships])+"\n")
+						break
+
+			elif "delay" in data:
+				for game in games:
+					if(game._Thread__ident == self.currentGame):
+						game.delayLength = float(data.split()[1])
 						break
 				
 
