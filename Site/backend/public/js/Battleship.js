@@ -5,6 +5,10 @@
 	Battleship Game Viewer
 */
 
+var API_KEY = "";
+
+var gameServer = "localhost";
+
 $(document).ready(function() {
 	// Connect To Socket
 	console.log("ready!");

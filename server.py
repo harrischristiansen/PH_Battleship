@@ -9,7 +9,6 @@ import socket
 import time
 from thread import start_new_thread
 import threading
-import random
 import json
 
 port = 23345
