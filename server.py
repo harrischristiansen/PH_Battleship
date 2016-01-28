@@ -160,7 +160,7 @@ class BattleshipGame(threading.Thread):
 		c1 = self.getCord(p)
 		if(p is self.p1):
 			for listener in self.listeners:
-				listener.sendMsg(self.p1Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
+				listener.sendMsg("M|"+self.p1Obj[0]+"|"+(str)(c1[0])+"|"+(str)(c1[1]))
 			hit = self.p2Ships[c1[0]][c1[1]]
 			if(hit > 0):
 				self.p2Ships[c1[0]][c1[1]] = 0 - hit
@@ -174,7 +174,7 @@ class BattleshipGame(threading.Thread):
 			
 		else:
 			for listener in self.listeners:
-				listener.sendMsg(self.p2Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
+				listener.sendMsg("M|"+self.p2Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
 			hit = self.p1Ships[c1[0]][c1[1]]
 			if(hit > 0):
 				self.p1Ships[c1[0]][c1[1]] = 0 - hit
@@ -258,7 +258,7 @@ class GameViewer(WebSocketServerProtocol):
 			for game in games:
 				gameIDs.append(game._Thread__ident)
 
-			self.sendMsg(json.dumps(gameIDs));
+			self.sendMsg("G|"+json.dumps(gameIDs));
 
 		elif "join" in data:
 			# Remove Current Listener
@@ -271,7 +271,7 @@ class GameViewer(WebSocketServerProtocol):
 			for game in games:
 				if(game._Thread__ident == self.currentGame):
 					game.listeners.append(self)
-					self.sendMsg(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
+					self.sendMsg("B|"+json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
 					break
 
 		elif "delay" in data:
