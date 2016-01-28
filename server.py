@@ -39,8 +39,8 @@ class BattleshipGame(threading.Thread):
 		self.p2Obj = p2
 		self.p1 = p1[1]
 		self.p2 = p2[1]
-		self.p1Ships = [[0 for x in range(8)] for x in range(8)] 
-		self.p2Ships = [[0 for x in range(8)] for x in range(8)] 
+		self.p1Ships = [[0 for x in range(8)] for x in range(8)]
+		self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 		self.p1Ready = 0
 		self.p2Ready = 0
 		self.playersConnected = True
@@ -114,13 +114,13 @@ class BattleshipGame(threading.Thread):
 
 	def placeShip(self,p,c1,c2,ship):
 		if(c1[0]==c2[0]):
-			for i in range(c1[1],c2[1]+1):
+			for i in range(min(c1[1],c2[1]),max(c1[1]+1,c2[1]+1)):
 				if(p is self.p1):
 					self.p1Ships[c1[0]][i] = ship
 				else:
 					self.p2Ships[c1[0]][i] = ship
 		else:
-			for i in range(c1[0],c2[0]+1):
+			for i in range(min(c1[0],c2[0]),max(c1[0]+1,c2[0]+1)):
 				if(p is self.p1):
 					self.p1Ships[i][c1[1]] = ship
 				else:
@@ -206,6 +206,8 @@ class BattleshipGame(threading.Thread):
 			self.p1Ready=self.p2Ready=0
 			self.sendMsg("Welcome To Battleship! Place your ships!")
 			self.gamePlaying = True
+			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
+			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 			start_new_thread(self.placeShips, (self.p1,))
 			start_new_thread(self.placeShips, (self.p2,))
 

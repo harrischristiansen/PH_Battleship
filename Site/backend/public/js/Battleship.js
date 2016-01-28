@@ -5,13 +5,13 @@
 	Battleship Game Viewer
 */
 
-var API_KEY = "";
-
 var gameServer = "ws://127.0.0.1:23346";
 
 var ws = null
 
 var currentGame = -1;
+var player1 = -1;
+var player2 = -1;
 
 $(document).ready(function() {
 	if ("WebSocket" in window) {
@@ -64,7 +64,7 @@ function updateGamesList() {
 function updateGamesListFromData(data) {
 	var games = JSON.parse(data);
 	$("#gamesList").html("");
-	for (var i=0; i<games.length; i++) {
+	for(var i=0; i<games.length; i++) {
 		$("#gamesList").append('<li><a href="#" onclick="joinGame(\''+games[i]+'\');">'+games[i]+'</a></li>');
 	}
 	if(games.length==0) {
@@ -79,11 +79,37 @@ function joinGame(gameID) {
 }
 function setGameBoards(data) {
 	var boards = JSON.parse(data);
+	$("#gameID").html(currentGame);
+	player1 = boards[0]; $("#player1ID").html(player1);
+	player2 = boards[2];$("#player2ID").html(player2);
+	
+	for(var x=0; x<boards[1].length; x++) {
+		for(var y=0; y<boards[1][x].length; y++) {
+			$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").html(boards[1][x][y]);
+		}
+	}
+	
+	for(var x=0; x<boards[3].length; x++) {
+		for(var y=0; y<boards[3][x].length; y++) {
+			$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").html(boards[3][x][y]);
+		}
+	}
+	
 	console.log("Setting Board");
 }
 
 // Function receive data from gameServer
 function updateGameBoards(player,letter,number) {
-	console.log("Updating Board");
+	if(player==player1) {
+		var currentNum = $("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
+		var newNum = 0 - Math.abs(parseInt(currentNum));
+		$("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").html(newNum);
+	} else if(player==player2) {
+		var currentNum = $("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
+		var newNum = 0 - Math.abs(parseInt(currentNum));
+		$("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").html(newNum);
+	} else {
+		joinGame(currentGame);
+	}
 }
 
