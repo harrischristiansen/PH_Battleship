@@ -10,6 +10,15 @@ import time
 from thread import start_new_thread
 import threading
 import json
+########## Start Web Sockets ##########
+from autobahn.twisted.websocket import WebSocketServerProtocol, \
+    WebSocketServerFactory
+import sys
+from twisted.python import log
+from twisted.internet import reactor
+## End WS ##
+
+############################################ Socket Connection ############################################
 
 port = 23345
 
@@ -228,53 +237,55 @@ class BattleshipGame(threading.Thread):
 
 ############################################ Web GUI Client ############################################
 
-class GameViewer(threading.Thread):
-	def __init__(self,c):
-		super(self.__class__, self).__init__()
-		self.c = c
+class GameViewer(WebSocketServerProtocol):
+
+	def onConnect(self, request):
 		self.currentGame = -1
-	def sendMsg(self,msg):
-		self.c.sendall(msg+"\n")
-	def run(self):
-		while True:
-			try:
-				data = self.c.recv(1024)
-			except: # Timeout
-				continue
 
-			if not data: # Client Closed Connection
-				self.c.close()
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.remove(self)
-				return False
+	def onOpen(self):
+		self.currentGame = -1
 
-			if "games" in data:
-				gameIDs = []
-				for game in games:
-					gameIDs.append(game._Thread__ident)
+	def sendMsg(self, msg):
+		self.sendMessage(msg, False)
 
-				self.c.sendall(json.dumps(gameIDs)+"\n");
+	def onMessage(self, payload, isBinary):
+		global games
 
-			elif "join" in data:
-				# Remove Current Listener
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.remove(self)
-						break
+		data = format(payload.decode('utf8'))
 
-				self.currentGame = int(data.split()[1])
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.append(self)
-						self.c.sendall(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships])+"\n")
-						break
+		if "games" in data:
+			gameIDs = []
+			for game in games:
+				gameIDs.append(game._Thread__ident)
 
-			elif "delay" in data:
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.delayLength = float(data.split()[1])
-						break
+			self.sendMsg(json.dumps(gameIDs));
+
+		elif "join" in data:
+			# Remove Current Listener
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.listeners.remove(self)
+					break
+
+			self.currentGame = int(data.split()[1])
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.listeners.append(self)
+					self.sendMsg(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
+					break
+
+		elif "delay" in data:
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.delayLength = float(data.split()[1])
+					break
+
+	def onClose(self, wasClean, code, reason):
+		global games
+		for game in games:
+			if(game._Thread__ident == self.currentGame): # Maybe Modify to check every game for self in listeners list
+				game.listeners.remove(self)
+				break
 				
 
 ############################################ Main Thread ############################################
@@ -294,12 +305,6 @@ def getPlayer1():
 			userID = userID.strip("\r\n ")
 		except:
 			p.close()
-			continue
-
-		if("GameViewer" in userID):
-			thread = GameViewer(p)
-			thread.setDaemon(True) # Set as background thread
-			thread.start()
 			continue
 
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
@@ -323,30 +328,39 @@ def getPlayer2():
 			p.close()
 			continue
 
-		if("GameViewer" in userID):
-			thread = GameViewer(p)
-			thread.setDaemon(True) # Set as background thread
-			thread.start()
-			continue
-
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
 
 		player2 = (userID,p)
 		players.append(player2)
 		break
 
-while True:
-	player1 = player2 = None
+def startGameThread():
+	global player1, player2
+	while True:
+		player1 = player2 = None
 
-	start_new_thread(getPlayer1,())
-	start_new_thread(getPlayer2,())
+		start_new_thread(getPlayer1,())
+		start_new_thread(getPlayer2,())
 
-	while(player1==None or player2==None):
-		time.sleep(0.1)
-		continue
+		while(player1==None or player2==None):
+			time.sleep(0.1)
+			continue
 
-	thread = BattleshipGame(player1,player2)
-	thread.setDaemon(True) # Set as background thread
-	thread.start()
+		thread = BattleshipGame(player1,player2)
+		thread.setDaemon(True) # Set as background thread
+		thread.start()
 
-s.close()
+	s.close()
+
+
+start_new_thread(startGameThread,())
+
+
+########## Start Web Sockets ##########
+#log.startLogging(sys.stdout)
+factory = WebSocketServerFactory(u"ws://127.0.0.1:23346", debug=False)
+factory.protocol = GameViewer
+# factory.setProtocolOptions(maxConnections=2)
+reactor.listenTCP(23346, factory)
+reactor.run()
+## End WS ##

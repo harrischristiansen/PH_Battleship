@@ -10,7 +10,7 @@
 		
 		$(document).ready(function() {
 			if ("WebSocket" in window) {
-				ws = new WebSocket("ws://echo.websocket.org");
+				ws = new WebSocket("ws://127.0.0.1:23346");
 				
 				ws.onopen = function() {
 					console.log("Connected");
@@ -23,6 +23,7 @@
 				
 				ws.onclose = function() { 
 					console.log("Disconnected");
+					ws = null;
 				};
 			}
 	        
@@ -31,13 +32,15 @@
 			}
 		});
 		
-		function sendMsg() {
-			ws.send("The Message");
+		function sendMsg(msg) {
+			if(ws != null) {
+				ws.send(msg);
+			}
 		}
 		
 	</script>
 </head><body>
 	
-<button onclick="sendMsg()">Send</button>
+<button onclick="sendMsg('games')">Send</button>
 	
 </body></html>
