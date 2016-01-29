@@ -30,6 +30,8 @@ s.listen(20)
 games = []
 players = []
 
+DEFAULT_DELAY_LENGTH = 2.001
+
 ############################################ Battleship Game Logic ############################################
 
 class BattleshipGame(threading.Thread):
@@ -46,7 +48,7 @@ class BattleshipGame(threading.Thread):
 		self.playersConnected = True
 		self.gamePlaying = True
 		self.listeners = []
-		self.delayLength = 0.001
+		self.delayLength = DEFAULT_DELAY_LENGTH
 
 	def sendMsg(self,msg):
 		try:
@@ -88,7 +90,7 @@ class BattleshipGame(threading.Thread):
 
 	def getCord(self,p):
 		try:
-			data = p.recv(1024)
+			data = p.recv(2)
 		except: # Timeout
 			print("Error: Timeout Receiving Coord, Ending Game")
 			self.setClosed(p)
@@ -127,8 +129,8 @@ class BattleshipGame(threading.Thread):
 					self.p2Ships[i][c1[1]] = ship
 
 	def placeShips(self,p):
-		#ships = [("Destoryer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
-		ships = [("Destoryer",2)]
+		ships = [("Destroyer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
+		#ships = [("Destroyer",2)]
 
 		for ship in ships:
 			self.sendMsgP(p,ship[0]+"("+(str)(ship[1])+"):")
@@ -146,8 +148,7 @@ class BattleshipGame(threading.Thread):
 			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]-c2[0])+abs(c1[1]-c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
-				print c1
-				print c2
+				print("Received Invalid Input - Ship Cords: "+(str)(c1)+", "+(str)(c2))
 				self.sendMsgP(p,"Error: Invalid Input - Ship Cords")
 				self.setClosed(p)
 				return False
@@ -174,7 +175,7 @@ class BattleshipGame(threading.Thread):
 			
 		else:
 			for listener in self.listeners:
-				listener.sendMsg("M|"+self.p2Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
+				listener.sendMsg("M|"+self.p2Obj[0]+"|"+(str)(c1[0])+"|"+(str)(c1[1]))
 			hit = self.p1Ships[c1[0]][c1[1]]
 			if(hit > 0):
 				self.p1Ships[c1[0]][c1[1]] = 0 - hit
@@ -204,7 +205,8 @@ class BattleshipGame(threading.Thread):
 
 		while self.playersConnected:
 			self.p1Ready=self.p2Ready=0
-			self.sendMsg("Welcome To Battleship! Place your ships!")
+			self.sendMsgP(self.p1,"Welcome To Battleship! You Are Playing:"+self.p2Obj[0])
+			self.sendMsgP(self.p2,"Welcome To Battleship! You Are Playing:"+self.p1Obj[0])
 			self.gamePlaying = True
 			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
@@ -310,6 +312,7 @@ def getPlayer1():
 			continue
 
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		p.sendall("True\n") # Let Know Connection Successful
 
 		player1 = (userID,p)
 		players.append(player1)
@@ -331,6 +334,7 @@ def getPlayer2():
 			continue
 
 		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		p.sendall("True\n") # Let Know Connection Successful
 
 		player2 = (userID,p)
 		players.append(player2)

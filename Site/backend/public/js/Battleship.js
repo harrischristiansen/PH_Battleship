@@ -20,6 +20,7 @@ $(document).ready(function() {
 		
 		ws.onopen = function() {
 			console.log("Connected");
+			updateGamesList();
 		};
 		
 		ws.onmessage = function (evt) { 
@@ -67,8 +68,13 @@ function updateGamesListFromData(data) {
 	for(var i=0; i<games.length; i++) {
 		$("#gamesList").append('<li><a href="#" onclick="joinGame(\''+games[i]+'\');">'+games[i]+'</a></li>');
 	}
+	
 	if(games.length==0) {
 		$("#gamesList").append('<li><a href="#">No Active Games</a></li>');
+	} else { // At least 1 game exists, join
+		if(currentGame == -1) {
+			joinGame(games[0]);
+		}
 	}
 }
 
@@ -81,7 +87,7 @@ function setGameBoards(data) {
 	var boards = JSON.parse(data);
 	$("#gameID").html(currentGame);
 	player1 = boards[0]; $("#player1ID").html(player1);
-	player2 = boards[2];$("#player2ID").html(player2);
+	player2 = boards[2]; $("#player2ID").html(player2);
 	
 	for(var x=0; x<boards[1].length; x++) {
 		for(var y=0; y<boards[1][x].length; y++) {
@@ -100,6 +106,9 @@ function setGameBoards(data) {
 
 // Function receive data from gameServer
 function updateGameBoards(player,letter,number) {
+	letter = parseInt(letter);
+	number = parseInt(number);
+	
 	if(player==player1) {
 		var currentNum = $("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
 		var newNum = 0 - Math.abs(parseInt(currentNum));
