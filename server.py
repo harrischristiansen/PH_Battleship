@@ -30,7 +30,7 @@ s.listen(20)
 games = []
 players = []
 
-DEFAULT_DELAY_LENGTH = 2.001
+DEFAULT_DELAY_LENGTH = 1.001
 
 ############################################ Battleship Game Logic ############################################
 
@@ -96,7 +96,7 @@ class BattleshipGame(threading.Thread):
 			self.setClosed(p)
 			return False
 
-		if not isinstance(data,(str)): # Client Closed Connection
+		if (not data) or (not isinstance(data,(str))): # Client Closed Connection
 			self.setClosed(p)
 			return False
 		try:
@@ -109,7 +109,7 @@ class BattleshipGame(threading.Thread):
 				return False
 
 			return (c,r)
-		except ValueError:
+		except (ValueError, IndexError) as e:
 			self.sendMsgP(p,"Error: Invalid Input - Parse Integer")
 			self.setClosed(p)
 			return False
@@ -133,7 +133,7 @@ class BattleshipGame(threading.Thread):
 		#ships = [("Destroyer",2)]
 
 		for ship in ships:
-			self.sendMsgP(p,ship[0]+"("+(str)(ship[1])+"):")
+			self.sendMsgP(p,ship[0]+"("+str(ship[1])+"):")
 			if(self.p1Ready==-1 or self.p2Ready==-1):
 				return False
 
@@ -148,7 +148,7 @@ class BattleshipGame(threading.Thread):
 			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]-c2[0])+abs(c1[1]-c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
-				print("Received Invalid Input - Ship Cords: "+(str)(c1)+", "+(str)(c2))
+				print("Received Invalid Input - Ship Cords: "+str(c1)+", "+str(c2))
 				self.sendMsgP(p,"Error: Invalid Input - Ship Cords")
 				self.setClosed(p)
 				return False
@@ -159,33 +159,45 @@ class BattleshipGame(threading.Thread):
 	def placeMove(self,p):
 		self.sendMsgP(p,"Enter Coordinates")
 		c1 = self.getCord(p)
+		if(c1 == False):
+			return False
 		if(p is self.p1):
-			for listener in self.listeners:
-				listener.sendMsg("M|"+self.p1Obj[0]+"|"+(str)(c1[0])+"|"+(str)(c1[1]))
 			hit = self.p2Ships[c1[0]][c1[1]]
+			hitResult = ""
 			if(hit > 0):
 				self.p2Ships[c1[0]][c1[1]] = 0 - hit
 				if any(hit in sublist for sublist in self.p2Ships):
 					self.sendMsgP(p,"Hit")
+					hitResult = "Hit"
 				else:
 					self.sendMsgP(p,"Sunk")
+					hitResult = "Sunk"
 				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
+				hitResult = "Miss"
+
+			for listener in self.listeners: # Notify GameViewer
+				listener.sendMsg("M|"+self.p1Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 			
 		else:
-			for listener in self.listeners:
-				listener.sendMsg("M|"+self.p2Obj[0]+"|"+(str)(c1[0])+"|"+(str)(c1[1]))
 			hit = self.p1Ships[c1[0]][c1[1]]
+			hitResult = ""
 			if(hit > 0):
 				self.p1Ships[c1[0]][c1[1]] = 0 - hit
 				if any(hit in sublist for sublist in self.p1Ships):
 					self.sendMsgP(p,"Hit")
+					hitResult = "Hit"
 				else:
 					self.sendMsgP(p,"Sunk")
+					hitResult = "Sunk"
 				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
+				hitResult = "Miss"
+				
+			for listener in self.listeners: # Notify GameViewer
+				listener.sendMsg("M|"+self.p2Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 
 		self.setReady(p)
 		return True
@@ -205,8 +217,8 @@ class BattleshipGame(threading.Thread):
 
 		while self.playersConnected:
 			self.p1Ready=self.p2Ready=0
-			self.sendMsgP(self.p1,"Welcome To Battleship! You Are Playing:"+self.p2Obj[0])
-			self.sendMsgP(self.p2,"Welcome To Battleship! You Are Playing:"+self.p1Obj[0])
+			self.sendMsgP(self.p1,"Welcome To Battleship! You Are Playing:"+self.p2Obj[0].split("-")[0])
+			self.sendMsgP(self.p2,"Welcome To Battleship! You Are Playing:"+self.p1Obj[0].split("-")[0])
 			self.gamePlaying = True
 			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
@@ -267,7 +279,7 @@ class GameViewer(WebSocketServerProtocol):
 		elif "join" in data:
 			# Remove Current Listener
 			for game in games:
-				if(game._Thread__ident == self.currentGame):
+				if(game._Thread__ident == self.currentGame) and (self in game.listeners):
 					game.listeners.remove(self)
 					break
 
@@ -306,7 +318,7 @@ def getPlayer1():
 			if not userID: # Client Closed Connection
 				p.close()
 				continue
-			userID = userID.strip("\r\n ")
+			userID = userID.strip("\r\n ")+"-"+str(addr[1])
 		except:
 			p.close()
 			continue
@@ -328,7 +340,7 @@ def getPlayer2():
 			if not userID: # Client Closed Connection
 				p.close()
 				continue
-			userID = userID.strip("\r\n ")
+			userID = userID.strip("\r\n ")+"-"+str(addr[1])
 		except:
 			p.close()
 			continue

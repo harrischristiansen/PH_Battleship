@@ -14,12 +14,12 @@
 </div>
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<h1>Game <span id="gameID"></span>: <span id="player1ID"></span> vs <span id="player2ID"></span></h1>
+	<h1>Game <span class="gameID"></span>: <span class="player1ID"></span> vs <span class="player2ID"></span></h1>
 	
 	<table class="table table-bordered" style="float: left; width: 49%;" id="player1">
 		<thead>
 			<tr>
-				<th>Player 1</th>
+				<th class="player1ID">Player 1</th>
 				<th>0</th>
 				<th>1</th>
 				<th>2</th>
@@ -125,7 +125,7 @@
 	<table class="table table-bordered" style="width: 49%; float: right;" id="player2">
 		<thead>
 			<tr>
-				<th>Player 2</th>
+				<th class="player2ID">Player 2</th>
 				<th>0</th>
 				<th>1</th>
 				<th>2</th>

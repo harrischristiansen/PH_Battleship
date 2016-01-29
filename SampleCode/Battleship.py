@@ -17,9 +17,10 @@ GAME_SERVER = "127.0.0.1"
 ##############################  PUT YOUR CODE HERE ##############################
 
 letters = ['A','B','C','D','E','F','G','H']
-grid = [[-1 for x in range(8)] for x in range(8)]
+grid = [[-1 for x in range(8)] for x in range(8)] # Fill Grid With -1s
 
-def placeShips(newOpponentID):
+def placeShips(opponentID):
+	global grid
 	# Fill Grid With -1s
 	grid = [[-1 for x in range(8)] for x in range(8)]
 
@@ -31,13 +32,13 @@ def placeShips(newOpponentID):
 	placeCarrier("E0","E4")
 
 def makeMove():
-	print "Made Move"
+	global grid
 	for x in range(0,8):
 		for y in range(0,8):
 			if grid[x][y] == -1:
-				wasHitSunkMiss = placeMove(letters[x]+(str)(y))
+				wasHitSunkOrMiss = placeMove(letters[x]+str(y)) # placeMove(LetterNumber) - Example: placeMove(D5)
 
-				if(wasHitSunkMiss == "Hit" or wasHitSunkMiss == "Sunk"):
+				if(wasHitSunkOrMiss == "Hit" or wasHitSunkOrMiss == "Sunk"):
 					grid[x][y] = 1
 				else:
 					grid[x][y] = 0
@@ -48,11 +49,14 @@ def makeMove():
 
 def connectToServer():
 	global s
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((GAME_SERVER, 23345))
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect((GAME_SERVER, 23345))
 
-	s.send(API_KEY)
-	data = s.recv(1024)
+		s.send(API_KEY)
+		data = s.recv(1024)
+	except:
+		s = None
 
 	if(data=="False"):
 		s = None
@@ -69,8 +73,6 @@ def gameMain():
 		else:
 			data = dataPassthrough
 			dataPassthrough = None
-
-		print "Received Data: "+data
 
 		if not data:
 			s.close()
