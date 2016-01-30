@@ -12,10 +12,9 @@ Sample Code
 	C
 
 Harris:  
-Implement Game Tracker API  
+Require Team Abb To Be Unique  
 Add Game/Tournament Controls  
-Game AI for participants to play against  
-Make GameViewer automatically join new room upon last closing (currently unnoticed)  
+Game AI for participants to play against   
 Make WebSockets refresh more often that once every 2 seconds  
 
 Questions:  

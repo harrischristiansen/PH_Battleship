@@ -32,7 +32,7 @@ s.listen(20)
 games = []
 players = []
 
-DEFAULT_DELAY_LENGTH = 1.001
+DEFAULT_DELAY_LENGTH = 0.201
 
 ############################################ Battleship Game Logic ############################################
 
@@ -209,9 +209,11 @@ class BattleshipGame(threading.Thread):
 			if(max(max(l) for l in self.p1Ships) <= 0):
 				# Player 2 Won
 				self.gamePlaying = False
+				content = urllib2.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
 			if(max(max(l) for l in self.p2Ships) <= 0):
 				# Player 1 Won
 				self.gamePlaying = False
+				content = urllib2.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
 
 	def run(self):
 		global games, players
@@ -251,6 +253,8 @@ class BattleshipGame(threading.Thread):
 					break
 
 		print "Game Ended"
+		for listener in self.listeners: # Tell GameViewers that game is closed
+			listener.sendMsg("closed")
 		games.remove(self)
 
 ############################################ Web GUI Client ############################################

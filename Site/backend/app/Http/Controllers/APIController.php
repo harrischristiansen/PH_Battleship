@@ -23,23 +23,31 @@ class APIController extends Controller {
 		}
 		return "False";
 	}
-	public function getGame($winner,$loser)
-	{
-		$game = new Game;
-		$game->winner=$winner;
-		$game->loser=$loser;
-		$game->save();
+	
+	public function getGame($winner,$loser) {
+		$winner = Team::where("abb",$winner)->first();
+		if($winner != null) {
+			$winner->wins++;
+			$winner->games++;
+			$winner->save();
+			$winnerKey = $winner->team_key;
+		}
 
-		$winner = Team::where("team_key",$winner)->first();
-		$winner->wins++;
-		$winner->games++;
-		$winner->save();
+		$loser = Team::where("abb",$loser)->first();
+		if($loser != null) {
+			$loser->games++;
+			$loser->save();
+			$loserKey = $loser->team_key;
+		}
+		
+		if($winner!=null && $loser!=null) {
+			$game = new Game;
+			$game->winner=$winnerKey;
+			$game->loser=$loserKey;
+			$game->save();
+		}
 
-		$loser = Team::where("team_key",$loser)->first();
-		$loser->games++;
-		$loser->save();
-
-		return "ok";
+		return "Ok";
 	}
     
 }

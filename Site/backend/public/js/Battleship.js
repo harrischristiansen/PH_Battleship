@@ -37,6 +37,8 @@ $(document).ready(function() {
 				updateGameBoards(msg_pieces[1],msg_pieces[2],msg_pieces[3],msg_pieces[4]);
 			} else if(msg_pieces[0] == "rejoin") {
 				joinGame(currentGame);
+			} else if(msg_pieces[0] == "closed") {
+				currentGame = -1;
 			} else {
 				console.log("Received Invalid Message");
 			}
