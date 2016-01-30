@@ -19,9 +19,9 @@ class APIController extends Controller {
 	public function getAuth($teamKey) {
 		$team = Team::where('team_key',$teamKey)->first();
 		if($team != null) {
-			return "true";
+			return $team->abb;
 		}
-		return "false";
+		return "False";
 	}
 	public function getGame($winner,$loser)
 	{

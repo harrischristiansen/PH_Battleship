@@ -10,6 +10,7 @@ import time
 from thread import start_new_thread
 import threading
 import json
+import urllib2
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
@@ -20,6 +21,7 @@ from twisted.internet import reactor
 
 ############################################ Socket Connection ############################################
 
+API_URL = "http://localhost:8888/api/"
 port = 23345
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -323,7 +325,15 @@ def getPlayer1():
 			p.close()
 			continue
 
-		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		if not "API_KEY_HERE" in userID:
+			# Verify userID (API_KEY)
+			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+			if "False" in content: # Invalid API_KEY
+				p.sendall("False\n")
+				continue
+			userID = content.strip("\r\n ")
+
+		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
 		p.sendall("True\n") # Let Know Connection Successful
 
 		player1 = (userID,p)
@@ -345,7 +355,15 @@ def getPlayer2():
 			p.close()
 			continue
 
-		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		if not "API_KEY_HERE" in userID:
+			# Verify userID (API_KEY)
+			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+			if "False" in content: # Invalid API_KEY
+				p.sendall("False\n")
+				continue
+			userID = content.strip("\r\n ")
+
+		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
 		p.sendall("True\n") # Let Know Connection Successful
 
 		player2 = (userID,p)

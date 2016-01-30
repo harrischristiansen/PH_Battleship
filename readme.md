@@ -12,7 +12,7 @@ Sample Code
 	C
 
 Harris:  
-Implement Auth/API  
+Implement Game Tracker API  
 Add Game/Tournament Controls  
 Game AI for participants to play against  
 Make GameViewer automatically join new room upon last closing (currently unnoticed)  

@@ -8,9 +8,8 @@
 
 import sys
 import socket
-from thread import start_new_thread
 
-API_KEY = "YOUR_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
+API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 
 GAME_SERVER = "127.0.0.1"
 
@@ -58,8 +57,10 @@ def connectToServer():
 	except:
 		s = None
 
-	if(data=="False"):
+	if("False" in data):
 		s = None
+		print "Invalid API_KEY"
+		sys.exit()
 
 
 destroyer=submarine=cruiser=battleship=carrier=("A0","A0")
@@ -101,12 +102,6 @@ def gameMain():
 		elif "Error" in data: # Error: xxx
 			print("Received Error: "+data)
 			sys.exit()
-		elif "Hit" in data:
-			lastMoveResult = "Hit"
-		elif "Sunk" in data:
-			lastMoveResult = "Sunk"
-		elif "Miss" in data:
-			lastMoveResult = "Miss"
 		else:
 			print("Received Unknown Response: "+data)
 			sys.exit()
