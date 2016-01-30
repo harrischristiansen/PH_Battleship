@@ -7,9 +7,9 @@ TODO
 Anyone:  
 Front-end Design  
 Sample Code  
-	Java  
-	Python (Almost Complete)  
-	C
+	Java (Almost Complete - Goucheng)  
+	Python (Almost Complete - Harris)  
+	C  
 
 Harris:  
 Require Team Abb To Be Unique  
@@ -19,7 +19,6 @@ Make WebSockets refresh more often that once every 2 seconds
 
 Questions:  
 Allow browser to see hidden ships? / Obfuscate boards for game viewer?  
-Tell players when they “Sunk” or only send “Hit”?  
 
 Dev Environment Setup Instructions
 -----------
@@ -45,4 +44,4 @@ Dev Environment Run Instructions
 Start MAMP Servers  
 Start Battleship Server: `python server.py`  
 Open localhost:8888/game (The Game Viewer must be opened after the python server is running)  
-Open and run 2 instances of client code (found in StarterCode folder)
+Open and run 2 instances of client code (found in StarterCode folder) (either leave API_KEY as `API_KEY_HERE` or create a team on localhost:8888/login and use it's API_KEY)

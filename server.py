@@ -32,7 +32,7 @@ s.listen(20)
 games = []
 players = []
 
-DEFAULT_DELAY_LENGTH = 0.201
+DEFAULT_DELAY_LENGTH = 1.001
 
 ############################################ Battleship Game Logic ############################################
 
@@ -132,7 +132,6 @@ class BattleshipGame(threading.Thread):
 
 	def placeShips(self,p):
 		ships = [("Destroyer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
-		#ships = [("Destroyer",2)]
 
 		for ship in ships:
 			self.sendMsgP(p,ship[0]+"("+str(ship[1])+"):")
@@ -305,7 +304,7 @@ class GameViewer(WebSocketServerProtocol):
 	def onClose(self, wasClean, code, reason):
 		global games
 		for game in games:
-			if(game._Thread__ident == self.currentGame): # Maybe Modify to check every game for self in listeners list
+			if(game._Thread__ident == self.currentGame) and (self in game.listeners): # Maybe Modify to check every game for self in listeners list
 				game.listeners.remove(self)
 				break
 				
@@ -397,7 +396,7 @@ start_new_thread(startGameThread,())
 
 
 ########## Start Web Sockets ##########
-#log.startLogging(sys.stdout)
+# log.startLogging(sys.stdout)
 factory = WebSocketServerFactory(u"ws://127.0.0.1:23346", debug=False)
 factory.protocol = GameViewer
 # factory.setProtocolOptions(maxConnections=2)
