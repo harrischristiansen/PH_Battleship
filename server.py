@@ -323,7 +323,7 @@ def getPlayer1():
 			if not userID: # Client Closed Connection
 				p.close()
 				continue
-			userID = userID.strip("\r\n ")+"-"+str(addr[1])
+			userID = userID.strip("\r\n ")
 		except:
 			p.close()
 			continue
@@ -336,6 +336,7 @@ def getPlayer1():
 				continue
 			userID = content.strip("\r\n ")
 
+		userID = userID+"-"+str(addr[1])
 		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
 		p.sendall("True\n") # Let Know Connection Successful
 
@@ -353,7 +354,7 @@ def getPlayer2():
 			if not userID: # Client Closed Connection
 				p.close()
 				continue
-			userID = userID.strip("\r\n ")+"-"+str(addr[1])
+			userID = userID.strip("\r\n ")
 		except:
 			p.close()
 			continue
@@ -366,6 +367,7 @@ def getPlayer2():
 				continue
 			userID = content.strip("\r\n ")
 
+		userID = userID+"-"+str(addr[1])
 		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
 		p.sendall("True\n") # Let Know Connection Successful
 
