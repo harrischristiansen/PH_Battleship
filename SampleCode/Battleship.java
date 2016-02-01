@@ -33,7 +33,7 @@ public class Battleship {
 	public Battleship() {
 		this.grid = new int[8][8];
 		for(int i = 0; i < grid.length; i++) { for(int j = 0; j < grid[i].length; j++) grid[i][j] = -1; }
-		this.letters = new char[] {'A','B','C','D','E','F','G', 'H'};
+		this.letters = new char[] {'A','B','C','D','E','F','G','H'};
 
 		destroyer = new String[] {"A0", "A0"};
 		submarine = new String[] {"A0", "A0"};
@@ -88,7 +88,7 @@ public class Battleship {
 			out.flush();
 			data = br.readLine();
 		} catch (Exception e) {
-			System.out.println("When connecting to server...");
+			System.out.println("Error: when connecting to the server...");
 			socket = null; 
 		}
 
@@ -104,19 +104,23 @@ public class Battleship {
 		while(true) {
 			System.out.println("every round");
 			try {
+				System.out.println("Getting data...");
 				if (this.dataPassthrough == null) {
-					System.out.println("before get data");
+					System.out.println("When dataPassThrough is null, getting data...");
 					this.data = this.br.readLine();
-					System.out.println("hasGetData");
 				}
 				else {
+					System.out.println("dataPassThrough is passing data to data...");
 					this.data = this.dataPassthrough;
 					this.dataPassthrough = null;
 				}
-			} catch (IOException ioe) {System.out.println("when geting data from the server"); }
+			} catch (IOException ioe) {
+				System.out.println("IOException: in gameMain"); 
+				ioe.printStackTrace();
+			}
 			if (this.data == null) {
-				try {this.socket.close(); } 
-				catch(Exception e) {System.out.println("Socket Close Error");}
+				try { this.socket.close(); } 
+				catch (IOException e) { System.out.println("Socket Close Error"); }
 				return;
 			}
 
@@ -125,55 +129,51 @@ public class Battleship {
 				placeShips(welcomeMsg[1]);
 				System.out.println("Placed Ships");
 			}
-			else if (data.contains( "Destroyer")) {
+			else if (data.contains("Destroyer")) {
 				this.out.print(destroyer[0]);
 				this.out.print(destroyer[1]);
 				out.flush();
-				System.out.println("Send Destroyer");
+				System.out.println("Send Destroyers");
 			}
-			else if (data.contains( "Submarine")) {
-				System.out.println("Before submarine");
+			else if (data.contains("Submarine")) {
 				this.out.print(submarine[0]);
 				this.out.print(submarine[1]);
 				out.flush();
-				System.out.println("Submarine");
+				System.out.println("Send Submarines");
 			}
-			else if (data.contains( "Cruiser")) {
-				System.out.println("Beforre set cruiser");
+			else if (data.contains("Cruiser")) {
 				this.out.print(cruiser[0]);
 				this.out.print(cruiser[1]);
 				out.flush();
-				System.out.println("Cruiser");
+				System.out.println("Send Cruisers");
 			}
-			else if (data.contains( "Battleship")) {
+			else if (data.contains("Battleship")) {
 				this.out.print(battleship[0]);
 				this.out.print(battleship[1]);
 				out.flush();
-				System.out.println("Send Battlehsip");
+				System.out.println("Send Battlehsips");
 			}
-			else if (data.contains( "Carrier")) {
-				System.out.println("Before sending carrier");
+			else if (data.contains("Carrier")) {
 				this.out.print(carrier[0]);
 				this.out.print(carrier[1]);
 				out.flush();
-				System.out.println("Send Carrier");
+				System.out.println("Send Carriers");
 			}
 			else if (data.contains( "Enter")) {
-				System.out.println("Before moving");
 				this.makeMove();
-				System.out.println("Mode Moves");
+				System.out.println("Made Move");
 			}
 			else if (data.contains("Error" )) {
 				out.print("Received Error");
 				out.flush();
 				System.out.println("Send Error");
-				System.exit(1);
+				System.exit(1); // Exit sys when there is an error
 			}
 			else {
 				out.print("Recieved Unknown Responce:" + data);
 				out.flush();
 				System.out.println("Send Destroyer");
-				System.exit(1); // Error
+				System.exit(1); // Exit sys when there is an unknown responce
 			}
 		}
 	}
@@ -201,8 +201,8 @@ public class Battleship {
 	String placeMove(String pos) {
 		this.out.print(pos);
 		out.flush();
-		try {data = this.br.readLine(); } 
-		catch(Exception e) {System.out.println("read Line in the placeMove");}
+		try { data = this.br.readLine(); } 
+		catch(Exception e) { System.out.println("No response after from the server after place the move"); }
 
 		if (data.contains("Hit")) return "Hit";
 		else if (data.contains("Sunk")) return "Sun";
