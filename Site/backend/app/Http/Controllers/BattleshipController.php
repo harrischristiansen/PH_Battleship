@@ -19,6 +19,10 @@ class BattleshipController extends Controller {
 	public function getLogin() {
 		return view('pages.login');
 	}
+	
+	public function getSocket() {
+		return view('pages.socketTest');
+	}
 
 	public function postLogin(Request $request) {
 		$password = $request->input('password');

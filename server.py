@@ -9,9 +9,19 @@ import socket
 import time
 from thread import start_new_thread
 import threading
-import random
 import json
+import urllib2
+########## Start Web Sockets ##########
+from autobahn.twisted.websocket import WebSocketServerProtocol, \
+    WebSocketServerFactory
+import sys
+from twisted.python import log
+from twisted.internet import reactor
+## End WS ##
 
+############################################ Socket Connection ############################################
+
+API_URL = "http://localhost:8888/api/"
 port = 23345
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,6 +32,8 @@ s.listen(20)
 games = []
 players = []
 
+DEFAULT_DELAY_LENGTH = 1.001
+
 ############################################ Battleship Game Logic ############################################
 
 class BattleshipGame(threading.Thread):
@@ -31,14 +43,14 @@ class BattleshipGame(threading.Thread):
 		self.p2Obj = p2
 		self.p1 = p1[1]
 		self.p2 = p2[1]
-		self.p1Ships = [[0 for x in range(8)] for x in range(8)] 
-		self.p2Ships = [[0 for x in range(8)] for x in range(8)] 
+		self.p1Ships = [[0 for x in range(8)] for x in range(8)]
+		self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 		self.p1Ready = 0
 		self.p2Ready = 0
 		self.playersConnected = True
 		self.gamePlaying = True
 		self.listeners = []
-		self.delayLength = 0.001
+		self.delayLength = DEFAULT_DELAY_LENGTH
 
 	def sendMsg(self,msg):
 		try:
@@ -80,13 +92,13 @@ class BattleshipGame(threading.Thread):
 
 	def getCord(self,p):
 		try:
-			data = p.recv(1024)
+			data = p.recv(2)
 		except: # Timeout
 			print("Error: Timeout Receiving Coord, Ending Game")
 			self.setClosed(p)
 			return False
 
-		if not isinstance(data,(str)): # Client Closed Connection
+		if (not data) or (not isinstance(data,(str))): # Client Closed Connection
 			self.setClosed(p)
 			return False
 		try:
@@ -99,31 +111,30 @@ class BattleshipGame(threading.Thread):
 				return False
 
 			return (c,r)
-		except ValueError:
+		except (ValueError, IndexError) as e:
 			self.sendMsgP(p,"Error: Invalid Input - Parse Integer")
 			self.setClosed(p)
 			return False
 
 	def placeShip(self,p,c1,c2,ship):
 		if(c1[0]==c2[0]):
-			for i in range(c1[1],c2[1]+1):
+			for i in range(min(c1[1],c2[1]),max(c1[1]+1,c2[1]+1)):
 				if(p is self.p1):
 					self.p1Ships[c1[0]][i] = ship
 				else:
 					self.p2Ships[c1[0]][i] = ship
 		else:
-			for i in range(c1[0],c2[0]+1):
+			for i in range(min(c1[0],c2[0]),max(c1[0]+1,c2[0]+1)):
 				if(p is self.p1):
 					self.p1Ships[i][c1[1]] = ship
 				else:
 					self.p2Ships[i][c1[1]] = ship
 
 	def placeShips(self,p):
-		#ships = [("Destoryer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
-		ships = [("Destoryer",2)]
+		ships = [("Destroyer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
 
 		for ship in ships:
-			self.sendMsgP(p,ship[0]+"("+(str)(ship[1])+"):")
+			self.sendMsgP(p,ship[0]+"("+str(ship[1])+"):")
 			if(self.p1Ready==-1 or self.p2Ready==-1):
 				return False
 
@@ -138,8 +149,7 @@ class BattleshipGame(threading.Thread):
 			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]-c2[0])+abs(c1[1]-c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
-				print c1
-				print c2
+				print("Received Invalid Input - Ship Cords: "+str(c1)+", "+str(c2))
 				self.sendMsgP(p,"Error: Invalid Input - Ship Cords")
 				self.setClosed(p)
 				return False
@@ -150,33 +160,45 @@ class BattleshipGame(threading.Thread):
 	def placeMove(self,p):
 		self.sendMsgP(p,"Enter Coordinates")
 		c1 = self.getCord(p)
+		if(c1 == False):
+			return False
 		if(p is self.p1):
-			for listener in self.listeners:
-				listener.sendMsg(self.p1Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
 			hit = self.p2Ships[c1[0]][c1[1]]
+			hitResult = ""
 			if(hit > 0):
 				self.p2Ships[c1[0]][c1[1]] = 0 - hit
 				if any(hit in sublist for sublist in self.p2Ships):
 					self.sendMsgP(p,"Hit")
+					hitResult = "Hit"
 				else:
 					self.sendMsgP(p,"Sunk")
+					hitResult = "Sunk"
 				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
+				hitResult = "Miss"
+
+			for listener in self.listeners: # Notify GameViewer
+				listener.sendMsg("M|"+self.p1Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 			
 		else:
-			for listener in self.listeners:
-				listener.sendMsg(self.p2Obj[0]+":"+(str)(c1[0])+","+(str)(c1[1]))
 			hit = self.p1Ships[c1[0]][c1[1]]
+			hitResult = ""
 			if(hit > 0):
 				self.p1Ships[c1[0]][c1[1]] = 0 - hit
 				if any(hit in sublist for sublist in self.p1Ships):
 					self.sendMsgP(p,"Hit")
+					hitResult = "Hit"
 				else:
 					self.sendMsgP(p,"Sunk")
+					hitResult = "Sunk"
 				self.checkGame()
 			else:
 				self.sendMsgP(p,"Miss")
+				hitResult = "Miss"
+				
+			for listener in self.listeners: # Notify GameViewer
+				listener.sendMsg("M|"+self.p2Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 
 		self.setReady(p)
 		return True
@@ -186,9 +208,11 @@ class BattleshipGame(threading.Thread):
 			if(max(max(l) for l in self.p1Ships) <= 0):
 				# Player 2 Won
 				self.gamePlaying = False
+				content = urllib2.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
 			if(max(max(l) for l in self.p2Ships) <= 0):
 				# Player 1 Won
 				self.gamePlaying = False
+				content = urllib2.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
 
 	def run(self):
 		global games, players
@@ -196,8 +220,11 @@ class BattleshipGame(threading.Thread):
 
 		while self.playersConnected:
 			self.p1Ready=self.p2Ready=0
-			self.sendMsg("Welcome To Battleship! Place your ships!")
+			self.sendMsgP(self.p1,"Welcome To Battleship! You Are Playing:"+self.p2Obj[0].split("-")[0])
+			self.sendMsgP(self.p2,"Welcome To Battleship! You Are Playing:"+self.p1Obj[0].split("-")[0])
 			self.gamePlaying = True
+			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
+			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 			start_new_thread(self.placeShips, (self.p1,))
 			start_new_thread(self.placeShips, (self.p2,))
 
@@ -225,57 +252,61 @@ class BattleshipGame(threading.Thread):
 					break
 
 		print "Game Ended"
+		for listener in self.listeners: # Tell GameViewers that game is closed
+			listener.sendMsg("closed")
 		games.remove(self)
 
 ############################################ Web GUI Client ############################################
 
-class GameViewer(threading.Thread):
-	def __init__(self,c):
-		super(self.__class__, self).__init__()
-		self.c = c
+class GameViewer(WebSocketServerProtocol):
+
+	def onConnect(self, request):
 		self.currentGame = -1
-	def sendMsg(self,msg):
-		self.c.sendall(msg+"\n")
-	def run(self):
-		while True:
-			try:
-				data = self.c.recv(1024)
-			except: # Timeout
-				continue
 
-			if not data: # Client Closed Connection
-				self.c.close()
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.remove(self)
-				return False
+	def onOpen(self):
+		self.currentGame = -1
 
-			if "games" in data:
-				gameIDs = []
-				for game in games:
-					gameIDs.append(game._Thread__ident)
+	def sendMsg(self, msg):
+		self.sendMessage(msg, False)
 
-				self.c.sendall(json.dumps(gameIDs)+"\n");
+	def onMessage(self, payload, isBinary):
+		global games
 
-			elif "join" in data:
-				# Remove Current Listener
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.remove(self)
-						break
+		data = format(payload.decode('utf8'))
 
-				self.currentGame = int(data.split()[1])
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.listeners.append(self)
-						self.c.sendall(json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships])+"\n")
-						break
+		if "games" in data:
+			gameIDs = []
+			for game in games:
+				gameIDs.append(game._Thread__ident)
 
-			elif "delay" in data:
-				for game in games:
-					if(game._Thread__ident == self.currentGame):
-						game.delayLength = float(data.split()[1])
-						break
+			self.sendMsg("G|"+json.dumps(gameIDs));
+
+		elif "join" in data:
+			# Remove Current Listener
+			for game in games:
+				if(game._Thread__ident == self.currentGame) and (self in game.listeners):
+					game.listeners.remove(self)
+					break
+
+			self.currentGame = int(data.split()[1])
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.listeners.append(self)
+					self.sendMsg("B|"+json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
+					break
+
+		elif "delay" in data:
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.delayLength = float(data.split()[1])
+					break
+
+	def onClose(self, wasClean, code, reason):
+		global games
+		for game in games:
+			if(game._Thread__ident == self.currentGame) and (self in game.listeners): # Maybe Modify to check every game for self in listeners list
+				game.listeners.remove(self)
+				break
 				
 
 ############################################ Main Thread ############################################
@@ -297,13 +328,17 @@ def getPlayer1():
 			p.close()
 			continue
 
-		if("GameViewer" in userID):
-			thread = GameViewer(p)
-			thread.setDaemon(True) # Set as background thread
-			thread.start()
-			continue
+		if not "API_KEY_HERE" in userID:
+			# Verify userID (API_KEY)
+			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+			if "False" in content: # Invalid API_KEY
+				p.sendall("False\n")
+				continue
+			userID = content.strip("\r\n ")
 
-		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		userID = userID+"-"+str(addr[1])
+		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
+		p.sendall("True\n") # Let Know Connection Successful
 
 		player1 = (userID,p)
 		players.append(player1)
@@ -324,30 +359,49 @@ def getPlayer2():
 			p.close()
 			continue
 
-		if("GameViewer" in userID):
-			thread = GameViewer(p)
-			thread.setDaemon(True) # Set as background thread
-			thread.start()
-			continue
+		if not "API_KEY_HERE" in userID:
+			# Verify userID (API_KEY)
+			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+			if "False" in content: # Invalid API_KEY
+				p.sendall("False\n")
+				continue
+			userID = content.strip("\r\n ")
 
-		print "Client Connected: " + addr[0] + ":" + str(addr[1])
+		userID = userID+"-"+str(addr[1])
+		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
+		p.sendall("True\n") # Let Know Connection Successful
 
 		player2 = (userID,p)
 		players.append(player2)
 		break
 
-while True:
-	player1 = player2 = None
+def startGameThread():
+	global player1, player2
+	while True:
+		player1 = player2 = None
 
-	start_new_thread(getPlayer1,())
-	start_new_thread(getPlayer2,())
+		start_new_thread(getPlayer1,())
+		start_new_thread(getPlayer2,())
 
-	while(player1==None or player2==None):
-		time.sleep(0.1)
-		continue
+		while(player1==None or player2==None):
+			time.sleep(0.1)
+			continue
 
-	thread = BattleshipGame(player1,player2)
-	thread.setDaemon(True) # Set as background thread
-	thread.start()
+		thread = BattleshipGame(player1,player2)
+		thread.setDaemon(True) # Set as background thread
+		thread.start()
 
-s.close()
+	s.close()
+
+
+start_new_thread(startGameThread,())
+
+
+########## Start Web Sockets ##########
+# log.startLogging(sys.stdout)
+factory = WebSocketServerFactory(u"ws://127.0.0.1:23346", debug=False)
+factory.protocol = GameViewer
+# factory.setProtocolOptions(maxConnections=2)
+reactor.listenTCP(23346, factory)
+reactor.run()
+## End WS ##
