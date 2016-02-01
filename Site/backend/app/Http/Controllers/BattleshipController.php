@@ -39,11 +39,15 @@ class BattleshipController extends Controller {
 	// Create Team
 	public function postCreateTeam(LoggedInRequest $request) {
 
+		if(Team::where('abb',$request->input('teamAbb'))->first())
+		{
+			$request->session()->flash('msg', 'That abbreviation has been taken!!');
+			return $this->getCreateTeam($request);
+		}
 		$hash = self::generateRandomInt();
         while(Team::where('team_key',$hash)->first()!=null) {
             $hash = self::generateRandomInt();
         }
-
 
 		$team = new Team;
 		$team->team_key = $hash;
