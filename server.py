@@ -22,17 +22,20 @@ from twisted.internet import reactor
 ############################################ Socket Connection ############################################
 
 API_URL = "http://localhost:8888/api/"
-port = 23345
+GAME_MODE = 0 # 0 = Normal, 1 = Tournament
+DEFAULT_DELAY_LENGTH = 1.001
+PORT_GAME_SERVER = 23345
+PORT_GAME_LISTENER = 23346
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', port))
+s.bind(('', PORT_GAME_SERVER))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Make Address Reusable - No Lockout
 s.listen(20)
 
 games = []
 players = []
-
-DEFAULT_DELAY_LENGTH = 1.001
+freePlayers = []
+tournamentPairings = []
 
 ############################################ Battleship Game Logic ############################################
 
@@ -311,85 +314,64 @@ class GameViewer(WebSocketServerProtocol):
 
 ############################################ Main Thread ############################################
 
-player1 = player2 = None
+def getPlayer():
+	global freePlayers, players
+	p, addr = s.accept()
+	start_new_thread(getPlayer,()) # Be ready to accept next player
+	p.settimeout(100) # TODO: Set to 10
 
-def getPlayer1():
-	global player1, players
-	while player1==None:
-		p, addr = s.accept()
-		p.settimeout(100) # TODO: Set to 10
-		try:
-			userID = p.recv(1024)
-			if not userID: # Client Closed Connection
-				p.close()
-				continue
-			userID = userID.strip("\r\n ")
-		except:
+	try:
+		userID = p.recv(1024)
+		if not userID: # Client Closed Connection
 			p.close()
-			continue
+			return
+		userID = userID.strip("\r\n ")
+	except: # Timed Out
+		p.close()
+		return
 
-		if not "API_KEY_HERE" in userID:
-			# Verify userID (API_KEY)
-			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
-			if "False" in content: # Invalid API_KEY
-				p.sendall("False\n")
-				continue
-			userID = content.strip("\r\n ")
-
-		userID = userID+"-"+str(addr[1])
-		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
-		p.sendall("True\n") # Let Know Connection Successful
-
-		player1 = (userID,p)
-		players.append(player1)
-		break
-
-def getPlayer2():
-	global player2, players
-	while player2==None:
-		p, addr = s.accept()
-		p.settimeout(100) # TODO: Set to 10
-		try:
-			userID = p.recv(1024)
-			if not userID: # Client Closed Connection
-				p.close()
-				continue
-			userID = userID.strip("\r\n ")
-		except:
+	if not "API_KEY_HERE" in userID:
+		# Verify userID (API_KEY)
+		content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+		if "False" in content: # Invalid API_KEY
+			p.sendall("False\n")
 			p.close()
-			continue
+			return
+		userID = content.strip("\r\n ")
 
-		if not "API_KEY_HERE" in userID:
-			# Verify userID (API_KEY)
-			content = urllib2.urlopen(API_URL+'auth/'+userID).read()
-			if "False" in content: # Invalid API_KEY
-				p.sendall("False\n")
-				continue
-			userID = content.strip("\r\n ")
-
-		userID = userID+"-"+str(addr[1])
-		print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
+	userID = userID+"-"+str(addr[1])
+	print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
+	try:
 		p.sendall("True\n") # Let Know Connection Successful
+	except:
+		p.close()
+		
 
-		player2 = (userID,p)
-		players.append(player2)
-		break
+	player = (userID,p)
+	freePlayers.append(player)
+	players.append(player)
+	return
 
 def startGameThread():
-	global player1, player2
+	start_new_thread(getPlayer,())
+
 	while True:
-		player1 = player2 = None
-
-		start_new_thread(getPlayer1,())
-		start_new_thread(getPlayer2,())
-
-		while(player1==None or player2==None):
+		while(len(freePlayers)<2):
 			time.sleep(0.1)
 			continue
 
-		thread = BattleshipGame(player1,player2)
-		thread.setDaemon(True) # Set as background thread
-		thread.start()
+		player1 = player2 = None
+		if GAME_MODE == 0: # Normal Mode
+			player1 = freePlayers.pop()
+			player2 = freePlayers.pop()
+		elif GAME_MODE == 1: # Tournament Mode
+			player1 = freePlayers.pop()
+			player2 = freePlayers.pop()
+
+		if(player1!=None and player2!=None):
+			thread = BattleshipGame(freePlayers.pop(),freePlayers.pop())
+			thread.setDaemon(True) # Set as background thread
+			thread.start()
 
 	s.close()
 
@@ -402,6 +384,6 @@ start_new_thread(startGameThread,())
 factory = WebSocketServerFactory(u"ws://127.0.0.1:23346", debug=False)
 factory.protocol = GameViewer
 # factory.setProtocolOptions(maxConnections=2)
-reactor.listenTCP(23346, factory)
+reactor.listenTCP(PORT_GAME_LISTENER, factory)
 reactor.run()
 ## End WS ##

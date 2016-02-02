@@ -44,4 +44,4 @@ Dev Environment Run Instructions
 Start MAMP Servers  
 Start Battleship Server: `python server.py`  
 Open localhost:8888/game (The Game Viewer must be opened after the python server is running)  
-Open and run 2 instances of client code (found in StarterCode folder) (either leave API_KEY as `API_KEY_HERE` or create a team on localhost:8888/login and use it's API_KEY)
+Open and run 2 instances of client code (found in StarterCode folder) (either leave API_KEY as `API_KEY_HERE` or create a team on localhost:8888/login and use it's API_KEY)  
