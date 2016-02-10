@@ -365,11 +365,19 @@ def startGameThread():
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
 		elif GAME_MODE == 1: # Tournament Mode
+			for freePlayer in freePlayers:
+				opponentID = tournamentPairings.get(freePlayer[0])
+				if opponentID != None:
+					for freePlayer2  in freePlayers:
+						if freePlayer2[0] == opponentID:
+							player1 = freePlayer # TODO: Remove from freePlayers
+							player2 = freePlayer2 # TODO: Remove from freePlayers
+
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
 
 		if(player1!=None and player2!=None):
-			thread = BattleshipGame(freePlayers.pop(),freePlayers.pop())
+			thread = BattleshipGame(player1,player2)
 			thread.setDaemon(True) # Set as background thread
 			thread.start()
 

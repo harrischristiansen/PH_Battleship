@@ -35,7 +35,7 @@ Run `php artisan key:generate` in the Site/backend directory
 Run `mkdir Site/backend/storage/framework/sessions` and `mkdir Site/backend/storage/framework/views`  
 Run `chmod -R 777 Site/backend/storage`  
 Install pip  
-Run `pip install Autobahn`  
+Run `pip install Autobahn --ignore-installed six`  
 Run `pip install twisted`  
 
 Dev Environment Run Instructions
