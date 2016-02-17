@@ -87,6 +87,7 @@ function joinGame(gameID) {
 }
 function setGameBoards(data) {
 	var boards = JSON.parse(data);
+	console.log(boards);
 	$(".gameID").text(currentGame);
 	player1 = boards[0]; $(".player1ID").text(player1.split("-")[0]);
 	player2 = boards[2]; $(".player2ID").text(player2.split("-")[0]);
@@ -94,12 +95,26 @@ function setGameBoards(data) {
 	for(var x=0; x<boards[1].length; x++) {
 		for(var y=0; y<boards[1][x].length; y++) {
 			$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[1][x][y]);
+			if (boards[1][x][y] === 10) {
+				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
+			} else if (boards[1][x][y] === 0) {
+				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
+			} else if (boards[1][x][y] < 0) {
+				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
+			}
 		}
 	}
 	
 	for(var x=0; x<boards[3].length; x++) {
 		for(var y=0; y<boards[3][x].length; y++) {
 			$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[3][x][y]);
+			if (boards[3][x][y] === 10) {
+				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
+			} else if (boards[3][x][y] === 0) {
+				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
+			} else if (boards[3][x][y] < 0) {
+				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
+			}
 		}
 	}
 	
