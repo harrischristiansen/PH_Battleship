@@ -9,7 +9,7 @@ import socket
 import time
 import threading
 import json
-import urllib2
+import urllib
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
@@ -214,11 +214,11 @@ class BattleshipGame(threading.Thread):
 		if(self.gamePlaying):
 			if(max(max(r) for r in self.p1Ships) <= 0): # Player 2 Won
 				self.gamePlaying = False
-				content = urllib2.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
+				content = urllib.request.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
 				self.p2Wins = self.p2Wins + 1
 			elif(max(max(r) for r in self.p2Ships) <= 0): # Player 1 Won
 				self.gamePlaying = False
-				content = urllib2.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
+				content = urllib.request.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
 				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
@@ -362,7 +362,7 @@ def getPlayer():
 
 	if not "API_KEY_HERE" in userID:
 		# Verify userID (API_KEY)
-		content = urllib2.urlopen(API_URL+'auth/'+userID).read()
+		content = urllib.request.urlopen(API_URL+'auth/'+userID).read()
 		if "False" in content: # Invalid API_KEY
 			p.sendall("False\n")
 			p.close()
