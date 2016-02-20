@@ -116,6 +116,10 @@ class BattleshipController extends Controller {
 
 	}
 	
+	public function getManage(LoggedInRequest $request) {
+		return view('pages.tournament');
+	}
+	
 	/////////////////////////////// Game Viewer ///////////////////////////////
 	
 	public function getGame() {
