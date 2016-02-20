@@ -51,6 +51,8 @@ class BattleshipGame(threading.Thread):
 		self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 		self.p1Ready = 0
 		self.p2Ready = 0
+		self.p1Wins = 0
+		self.p2Wins = 0
 		self.playersConnected = True
 		self.gamePlaying = True
 		self.listeners = []
@@ -211,14 +213,14 @@ class BattleshipGame(threading.Thread):
 
 	def checkGame(self):
 		if(self.gamePlaying):
-			if(max(max(r) for r in self.p1Ships) <= 0):
-				# Player 2 Won
+			if(max(max(r) for r in self.p1Ships) <= 0): # Player 2 Won
 				self.gamePlaying = False
 				content = urllib2.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
-			if(max(max(r) for r in self.p2Ships) <= 0):
-				# Player 1 Won
+				self.p2Wins = self.p2Wins + 1
+			elif(max(max(r) for r in self.p2Ships) <= 0): # Player 1 Won
 				self.gamePlaying = False
 				content = urllib2.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
+				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
 		global games, players
@@ -298,7 +300,7 @@ class GameViewer(WebSocketServerProtocol):
 			for game in games:
 				if(game._Thread__ident == self.currentGame):
 					game.listeners.append(self)
-					self.sendMsg("B|"+json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
+					self.sendMsg("B|"+json.dumps([game.p1Obj[0],game.p1Wins,game.p1Ships,game.p2Obj[0],game.p2Wins,game.p2Ships]))
 					break
 
 		elif "masterDelay" in data:

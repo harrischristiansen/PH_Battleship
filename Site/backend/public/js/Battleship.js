@@ -80,6 +80,11 @@ function updateGamesListFromData(data) {
 	}
 }
 
+// Function onClick Delay Picker -> Set Game Move Delay
+function setDelay(selectedDelay) {
+	sendMsgToServer("delay "+selectedDelay);
+}
+
 // Function onClick game -> join/load game
 function joinGame(gameID) {
 	currentGame = gameID
@@ -90,14 +95,16 @@ function setGameBoards(data) {
 	console.log(boards);
 	$(".gameID").text(currentGame);
 	player1 = boards[0]; $(".player1ID").text(player1.split("-")[0]);
-	player2 = boards[2]; $(".player2ID").text(player2.split("-")[0]);
+	$(".player1Wins").text("Wins: " + boards[1]);
+	player2 = boards[3]; $(".player2ID").text(player2.split("-")[0]);
+	$(".player2Wins").text("Wins: " + boards[4]);
 	
-	for(var x=0; x<boards[1].length; x++) {
-		for(var y=0; y<boards[1][x].length; y++) {
-			$("#player1Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[1][x][y]);
-			if (boards[1][x][y] == -10) {
+	for(var x=0; x<boards[2].length; x++) {
+		for(var y=0; y<boards[2][x].length; y++) {
+			$("#player1Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[2][x][y]);
+			if (boards[2][x][y] == -10) {
 				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
-			} else if (boards[1][x][y] < 0) {
+			} else if (boards[2][x][y] < 0) {
 				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
 			} else {
 				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
@@ -105,12 +112,12 @@ function setGameBoards(data) {
 		}
 	}
 	
-	for(var x=0; x<boards[3].length; x++) {
-		for(var y=0; y<boards[3][x].length; y++) {
-			$("#player2Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[3][x][y]);
-			if (boards[3][x][y] == -10) {
+	for(var x=0; x<boards[5].length; x++) {
+		for(var y=0; y<boards[5][x].length; y++) {
+			$("#player2Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[5][x][y]);
+			if (boards[5][x][y] == -10) {
 				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
-			} else if (boards[3][x][y] < 0) {
+			} else if (boards[5][x][y] < 0) {
 				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
 			} else {
 				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');

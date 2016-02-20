@@ -15,10 +15,11 @@
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<h1>
-		<span class="player1ID"></span> vs <span class="player2ID"></span>
-		<div id="delayPicker">
-			<select>
+		<span class="player1ID">Player 1</span> vs <span class="player2ID">Player 2</span>
+		<div id="delayPicker">Move Delay:
+			<select onchange="setDelay(this.value)">
 				<option value="0.002">None</option>
+				<option value="0.2">0.2 Seconds</option>
 				<option value="1.0">1 Second</option>
 				<option value="2.0">2 Seconds</option>
 				<option value="4.0">4 Seconds</option>
@@ -29,7 +30,7 @@
 	<div class="row">
 		<div class="col-md-6">
 			<div class="board-container">
-				<h3 class="player1ID">Player 1</h3>
+				<h3><span class="player1ID">Player 1</span> - <span class="player1Wins"></span></h3>
 				<table class="table table-bordered" id="player1">
 					<thead>
 						<tr>
@@ -47,91 +48,91 @@
 					<tbody>
 						<tr>
 							<td>A</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-hit">x</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>B</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
 							<td class="status-hit">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-none">x</td>
 							<td class="status-hit">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>C</td>
-							<td class="status-miss">x</td>
+							<td class="status-hit">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-hit">x</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>D</td>
-							<td class="status-miss">x</td>
-							<td class="status-hit">x</td>
-							<td class="status-hit">x</td>
-							<td class="status-hit">x</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>E</td>
-							<td class="status-miss">x</td>
-							<td class="status-none">x</td>
-							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>F</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
 						</tr>
 						<tr>
 							<td>G</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
-							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
 						</tr>
 						<tr>
 							<td>H</td>
 							<td class="status-none">x</td>
 							<td class="status-none">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
 							<td class="status-none">x</td>
+							<td class="status-miss">x</td>
 						</tr>
 					</tbody>
 				</table>
@@ -139,7 +140,7 @@
 		</div>
 		<div class="col-md-6">
 			<div class="board-container">
-				<h3 class="player2ID">Player 2</h3>
+				<h3><span class="player2ID">Player 2</span> - <span class="player2Wins"></span></h3>
 				<table class="table table-bordered" id="player2">
 					<thead>
 						<tr>
@@ -157,90 +158,90 @@
 					<tbody>
 						<tr>
 							<td>A</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-hit">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>B</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-hit">x</td>
+							<td class="status-hit">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>C</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-hit">x</td>
+							<td class="status-none">x</td>
+							<td class="status-hit">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>D</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>E</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>F</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
 						</tr>
 						<tr>
 							<td>G</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
 							<td class="status-miss">x</td>
 						</tr>
 						<tr>
 							<td>H</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
+							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
-							<td class="status-miss">x</td>
+							<td class="status-none">x</td>
 							<td class="status-miss">x</td>
 						</tr>
 					</tbody>
