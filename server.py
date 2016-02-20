@@ -7,7 +7,6 @@
 
 import socket
 import time
-from thread import start_new_thread
 import threading
 import json
 import urllib2
@@ -233,8 +232,8 @@ class BattleshipGame(threading.Thread):
 			self.gamePlaying = True
 			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
-			start_new_thread(self.placeShips, (self.p1,))
-			start_new_thread(self.placeShips, (self.p2,))
+			threading.Thread(target=self.placeShips,args=(self.p1,)).start()
+			threading.Thread(target=self.placeShips,args=(self.p2,)).start()
 
 			while(self.p1Ready==0 or self.p2Ready==0):
 				time.sleep(0.003)
@@ -249,8 +248,8 @@ class BattleshipGame(threading.Thread):
 			while self.gamePlaying:
 				time.sleep(self.delayLength) # Adjustable Move Delay Length
 				self.p1Ready=self.p2Ready=0
-				start_new_thread(self.placeMove, (self.p1,))
-				start_new_thread(self.placeMove, (self.p2,))
+				threading.Thread(target=self.placeMove,args=(self.p1,)).start()
+				threading.Thread(target=self.placeMove,args=(self.p2,)).start()
 
 				while(self.p1Ready==0 or self.p2Ready==0):
 					time.sleep(0.003)
@@ -259,7 +258,7 @@ class BattleshipGame(threading.Thread):
 				if(self.p1Ready==-1 or self.p2Ready==-1):
 					break
 
-		print "Game Ended"
+		print("Game Ended")
 		for listener in self.listeners: # Tell GameViewers that game is closed
 			listener.sendMsg("closed")
 		games.remove(self)
@@ -348,7 +347,7 @@ class GameViewer(WebSocketServerProtocol):
 def getPlayer():
 	global freePlayers, players
 	p, addr = s.accept()
-	start_new_thread(getPlayer,()) # Be ready to accept next player
+	threading.Thread(target=getPlayer).start() # Be ready to accept next player
 	p.settimeout(MOVE_TIMEOUT) # Set Move Timeout
 
 	try:
@@ -371,7 +370,7 @@ def getPlayer():
 		userID = content.strip("\r\n ")
 
 	userID = userID+"-"+str(addr[1])
-	print "Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID)
+	print("Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID))
 	try:
 		p.sendall("True\n") # Let Know Connection Successful
 	except:
@@ -390,7 +389,7 @@ def startMatch(player1, player2):
 		thread.start()
 
 def startGameThread():
-	start_new_thread(getPlayer,())
+	threading.Thread(target=getPlayer).start()
 
 	while True:
 		while(len(freePlayers)<2):
@@ -419,7 +418,7 @@ def startGameThread():
 
 #################### Main ####################
 if __name__ == "__main__":
-	start_new_thread(startGameThread,())
+	threading.Thread(target=startGameThread).start()
 
 
 	########## Start Web Sockets ##########
