@@ -418,8 +418,9 @@ def startGameThread():
 
 #################### Main ####################
 if __name__ == "__main__":
-	threading.Thread(target=startGameThread).start()
-
+	t = threading.Thread(target=startGameThread)
+	t.daemon = True # Set as background thread
+	t.start()
 
 	########## Start Web Sockets ##########
 	# log.startLogging(sys.stdout)
