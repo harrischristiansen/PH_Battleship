@@ -5,15 +5,15 @@ TODO
 -----------
 
 Anyone:  
-Projector Page (Logo, Anvil Wifi Info, URL To Download Starter Code)  
-Starter Code  
-	C  
-	Seperate Code into 2 files, one containing placeShips and makeMove methods, other containing everything else (makes less scary)  
+1. Projector Page (Logo, Anvil Wifi Info, URL To Download Starter Code)  
+2. Starter Code  
+	⋅⋅* C  
+	⋅⋅* Seperate Code into 2 files, one containing placeShips and makeMove methods, other containing everything else (makes less scary)  
 
 Harris:  
-Require Team Abb To Be Unique  
-Manage Tournament Controls - Admin Side  
-Fix websocket delay  
+1. Require Team Abb To Be Unique  
+2. Manage Tournament Controls - Admin Side  
+3. Fix websocket delay  
 
 Dev Environment Setup Instructions
 -----------
