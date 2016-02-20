@@ -11,9 +11,7 @@ Anyone:
   - Seperate Code into 2 files, one containing placeShips and makeMove methods, other containing everything else (makes less scary)  
 
 Harris:  
-1. Require Team Abb To Be Unique  
-2. Manage Tournament Controls - Admin Side  
-3. Fix websocket delay  
+1. Manage Tournament Controls - Admin Side  
 
 Dev Environment Setup Instructions
 -----------

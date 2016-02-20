@@ -61,17 +61,17 @@ class BattleshipGame(threading.Thread):
 		try:
 			self.p1.sendall(msg+"\n")
 		except:
-			self.setClosed(self.p1)
+			self.endGame()
 		try:
 			self.p2.sendall(msg+"\n")
 		except:
-			self.setClosed(self.p2)
+			self.endGame()
 
 	def sendMsgP(self,p,msg):
 		try:
 			p.sendall(msg+"\n")
 		except:
-			self.setClosed(p)
+			self.endGame()
 
 	def setReady(self,p):
 		if p is self.p1:
@@ -79,61 +79,74 @@ class BattleshipGame(threading.Thread):
 		elif p is self.p2:
 			self.p2Ready = 1
 
-	def setClosed(self,p):
+	def endGame(self):
+		self.gamePlaying = False
+		self.playersConnected = False
+
 		if(self.p1 != None):
 			self.p1Ready = -1
 			self.p1.close()
 			players.remove(self.p1Obj)
 			self.p1 = None
-	
+		
 		if(self.p2 != None):
 			self.p2Ready = -1
 			self.p2.close()
 			players.remove(self.p2Obj)
 			self.p2 = None
 
-		self.gamePlaying = False
-		self.playersConnected = False
-
 	def getCord(self,p):
 		try:
 			data = p.recv(2)
 		except: # Timeout
 			print("Error: Timeout Receiving Coord, Ending Game")
-			self.setClosed(p)
+			self.endGame()
 			return False
 
 		if (not data) or (not isinstance(data,(str))): # Client Closed Connection
-			self.setClosed(p)
+			self.endGame()
 			return False
 		try:
 			c = ord(data[0])-65
 			r = int(data[1])
 
 			if(c<0 or c>=8 or r<0 or r>=8):
-				self.sendMsgP(p,"Error: Invalid Input - Out Of Bounds")
-				self.setClosed(p)
+				self.sendMsgP(p,"Error: Invalid Input - Coordinate Out Of Bounds")
+				self.endGame()
 				return False
 
 			return (c,r)
 		except (ValueError, IndexError) as e:
 			self.sendMsgP(p,"Error: Invalid Input - Parse Integer")
-			self.setClosed(p)
+			self.endGame()
 			return False
 
 	def placeShip(self,p,c1,c2,ship):
-		if(c1[0]==c2[0]):
+		if(p is self.p1):
+			ships = self.p1Ships
+		elif(p is self.p2):
+			ships = self.p2Ships
+		else:
+			print("Error: placeShip - p is not either team")
+			self.endGame()
+			return False
+
+		if c1[0]==c2[0]:
 			for i in range(min(c1[1],c2[1]),max(c1[1]+1,c2[1]+1)):
-				if(p is self.p1):
-					self.p1Ships[c1[0]][i] = ship
+				if ships[c1[0]][i] == 0:
+					ships[c1[0]][i] = ship
 				else:
-					self.p2Ships[c1[0]][i] = ship
+					self.sendMsgP(p,"Error: Invalid Input - Overlapping Ships")
+					self.endGame()
+					return False
 		else:
 			for i in range(min(c1[0],c2[0]),max(c1[0]+1,c2[0]+1)):
-				if(p is self.p1):
-					self.p1Ships[i][c1[1]] = ship
+				if ships[i][c1[1]] == 0:
+					ships[i][c1[1]] = ship
 				else:
-					self.p2Ships[i][c1[1]] = ship
+					self.sendMsgP(p,"Error: Invalid Input - Overlapping Ships")
+					self.endGame()
+					return False
 
 	def placeShips(self,p):
 		ships = [("Destroyer",2),("Submarine",3),("Cruiser",3),("Battleship",4),("Carrier",5)]
@@ -154,9 +167,8 @@ class BattleshipGame(threading.Thread):
 			if(c1 != False and c2 != False and (c1[0]==c2[0] or c1[1]==c2[1]) and (abs(c1[0]-c2[0])+abs(c1[1]-c2[1])+1)==ship[1]):
 				self.placeShip(p,c1,c2,ships.index(ship)+1)
 			else:
-				print("Received Invalid Input - Ship Cords: "+str(c1)+", "+str(c2))
 				self.sendMsgP(p,"Error: Invalid Input - Ship Cords")
-				self.setClosed(p)
+				self.endGame()
 				return False
 
 		self.setReady(p)
@@ -167,45 +179,36 @@ class BattleshipGame(threading.Thread):
 		c1 = self.getCord(p)
 		if(c1 == False):
 			return False
-		if(p is self.p1):
-			hit = self.p2Ships[c1[0]][c1[1]]
-			hitResult = ""
-			if hit > 0: # Was A Hit
-				self.p2Ships[c1[0]][c1[1]] = 0 - hit # Mark As Hit
-				if any(hit in sublist for sublist in self.p2Ships):
-					self.sendMsgP(p,"Hit")
-					hitResult = "Hit"
-				else: # Was Sunk (last occurance of ship in field)
-					self.sendMsgP(p,"Sunk")
-					hitResult = "Sunk"
-				self.checkGame()
-			else: # Was A Miss
-				self.p2Ships[c1[0]][c1[1]] = -10 # Mark As Miss
-				self.sendMsgP(p,"Miss")
-				hitResult = "Miss"
 
-			for listener in self.listeners: # Notify GameViewer
-				listener.sendMsg("M|"+self.p1Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
-			
+		if(p is self.p1):
+			ships = self.p2Ships
+			playerObj = self.p1Obj
+		elif(p is self.p2):
+			ships = self.p1Ships
+			playerObj = self.p2Obj
 		else:
-			hit = self.p1Ships[c1[0]][c1[1]]
-			hitResult = ""
-			if hit > 0: # Was A Hit
-				self.p1Ships[c1[0]][c1[1]] = 0 - hit # Mark As Hit
-				if any(hit in sublist for sublist in self.p1Ships):
-					self.sendMsgP(p,"Hit")
-					hitResult = "Hit"
-				else: # Was Sunk (last occurance of ship in field)
-					self.sendMsgP(p,"Sunk")
-					hitResult = "Sunk"
-				self.checkGame()
-			else: # Was A Miss
-				self.p1Ships[c1[0]][c1[1]] = -10 # Mark As Miss
-				self.sendMsgP(p,"Miss")
-				hitResult = "Miss"
-				
-			for listener in self.listeners: # Notify GameViewer
-				listener.sendMsg("M|"+self.p2Obj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
+			print("Error: placeMove - p is not either team")
+			self.endGame()
+			return False
+
+		hit = ships[c1[0]][c1[1]]
+		hitResult = ""
+		if hit > 0: # Was A Hit
+			ships[c1[0]][c1[1]] = 0 - hit # Mark As Hit
+			if any(hit in sublist for sublist in ships):
+				self.sendMsgP(p,"Hit")
+				hitResult = "Hit"
+			else: # Was Sunk (last occurance of ship in field)
+				self.sendMsgP(p,"Sunk")
+				hitResult = "Sunk"
+			self.checkGame() # Check if game is over
+		else: # Was A Miss
+			ships[c1[0]][c1[1]] = -10 # Mark As Miss
+			self.sendMsgP(p,"Miss")
+			hitResult = "Miss"
+
+		for listener in self.listeners: # Notify GameViewer
+			listener.sendMsg("M|"+playerObj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 
 		self.setReady(p)
 		return True
@@ -233,8 +236,8 @@ class BattleshipGame(threading.Thread):
 			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 			p1Thread = threading.Thread(target=self.placeShips,args=(self.p1,))
-			p1Thread.start()
 			p2Thread = threading.Thread(target=self.placeShips,args=(self.p2,))
+			p1Thread.start()
 			p2Thread.start()
 
 			p1Thread.join() # Wait for Players to finish
@@ -251,8 +254,8 @@ class BattleshipGame(threading.Thread):
 
 				self.p1Ready=self.p2Ready=0
 				p1Thread = threading.Thread(target=self.placeMove,args=(self.p1,))
-				p1Thread.start()
 				p2Thread = threading.Thread(target=self.placeMove,args=(self.p2,))
+				p1Thread.start()
 				p2Thread.start()
 
 				p1Thread.join() # Wait for Players to finish
@@ -309,7 +312,10 @@ class GameViewer(WebSocketServerProtocol):
 
 		elif "masterDelay" in data:
 			try:
-				DEFAULT_DELAY_LENGTH = float(data.split()[1])
+				newDelay = float(data.split()[1])
+				DEFAULT_DELAY_LENGTH = newDelay
+				for game in games:
+					game.delayLength = newDelay
 			except:
 				None
 
@@ -328,7 +334,7 @@ class GameViewer(WebSocketServerProtocol):
 			except:
 				None
 
-		elif "pair" in data:
+		elif "pair" in data: # Pair 2 Teams Together
 			player1 = data.split()[1]
 			player2 = data.split()[2]
 			for tournamentPair in tournamentPairings: # Remove Current Pairings For Both Teams
@@ -337,6 +343,10 @@ class GameViewer(WebSocketServerProtocol):
 
 			pair = (player1,player2)
 			tournamentPairings.append(pair)
+
+		elif "reset" in data: # End All Games
+			for game in games:
+				game.endGame()
 
 
 	def onClose(self, wasClean, code, reason):

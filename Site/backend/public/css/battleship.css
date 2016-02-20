@@ -161,7 +161,15 @@ body {
 
 #delayPicker {
 	float: right;
-	
+	font-size: 0.8em;
+	margin-top: 3px;
+}
+
+#delayPickerSelect {
+	display: inline;
+	float: right;
+	width: 200px;
+	margin-top: -7px;
 }
 
 .main .table {

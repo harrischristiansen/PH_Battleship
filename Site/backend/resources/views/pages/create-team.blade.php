@@ -11,7 +11,7 @@
 			{!! csrf_field() !!}
 			<input type="text" name="teamName" id="teamName" placeholder="Team Name" class="form-control">
 			<br>
-			<input type="text" name="teamAbb" id="teamAbb" placeholder="Team Abbreviation" class="form-control">
+			<input type="text" name="teamAbb" id="teamAbb" placeholder="Team Abbreviation" maxlength="4" class="form-control">
 			<br>
 			<input type="submit" value="Create Team" class="btn btn-primary">
 		</form>

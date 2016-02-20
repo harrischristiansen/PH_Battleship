@@ -17,7 +17,8 @@
 	<h1>
 		<span class="player1ID">Player 1</span> vs <span class="player2ID">Player 2</span>
 		<div id="delayPicker">Move Delay:
-			<select onchange="setDelay(this.value)">
+			<select id="delayPickerSelect" class="form-control" onchange="setDelay(this.value)">
+				<option value="DoNothing"> - Select - </option>
 				<option value="0.002">None</option>
 				<option value="0.2">0.2 Seconds</option>
 				<option value="1.0">1 Second</option>

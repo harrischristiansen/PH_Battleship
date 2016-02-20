@@ -56,7 +56,7 @@ class BattleshipController extends Controller {
 		$team = new Team;
 		$team->team_key = $hash;
 		$team->name = $request->input('teamName');
-		$team->abb = $request->input('teamAbb');
+		$team->abb = strtoupper($request->input('teamAbb'));
 		$team->save();
 		$request->session()->flash('msg', 'Team '.$team->name.' created!');
 		return $this->getEditTeam($request);
@@ -71,32 +71,24 @@ class BattleshipController extends Controller {
 		// $teamKey = $request->input('teamKey');
 		$team = Team::findOrFail($teamID);
 		$team->name = $request->input('teamName');
-		$team->abb = $request->input('teamAbb');
-		if($request->input('delete')=="delete")
-		{
+		$team->abb = strtoupper($request->input('teamAbb'));
+		if($request->input('delete')=="delete") {
 			$team->delete();
 			$request->session()->flash('msg', 'Team '.$team->name.' deleted!');
-		}
-		else if($request->input('reset')=="reset")
-			{
-				$team->games=0;
-				$team->wins=0;
-				$request->session()->flash('msg', 'Team '.$team->name.' reset!');
-				$team->save();
-			}
-		else
-		{
+		} else if($request->input('reset')=="reset") {
+			$team->games=0;
+			$team->wins=0;
+			$request->session()->flash('msg', 'Team '.$team->name.' reset!');
+			$team->save();
+		} else {
 			$request->session()->flash('msg', 'Team '.$team->name.' updated!');
 			$team->save();
 		}
-			
-
 		
 		return $this->getEditTeam($request);
 	}
 	public function getEditTeam(LoggedInRequest $request,$id=0) {
-		if($id==0)
-		{
+		if($id==0) {
 			$teams = Team::all();
 			return view('pages.teams',compact('teams'));
 		}
@@ -104,8 +96,7 @@ class BattleshipController extends Controller {
 		return view('pages.team-detail',compact('team'));
 	}
 
-	public function getRankings(LoggedInRequest $request)
-	{
+	public function getRankings(LoggedInRequest $request) {
 		$rankings = DB::table('teams')
                  ->select(DB::raw('*, (wins / games) as win_percent'))
                  ->orderBy('win_percent','DESC')

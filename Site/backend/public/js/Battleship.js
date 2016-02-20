@@ -5,7 +5,7 @@
 	Battleship Game Viewer
 */
 
-var gameServer = "ws://127.0.0.1:23346";
+var GAME_SERVER = "ws://127.0.0.1:23346";
 
 var ws = null;
 
@@ -15,8 +15,9 @@ var player2 = -1;
 
 $(document).ready(function() {
 	if ("WebSocket" in window) {
-		ws = new WebSocket(gameServer);
-		window.setInterval(updateGamesList, 200); // TODO: Fix this shitty solution to fix message receive rate
+		ws = new WebSocket(GAME_SERVER);
+		window.setInterval(updateGamesList, 3000);
+		window.setInterval(sendMsgToGetMessages, 200); // TODO: Fix this shitty solution to fix message receive rate
 		
 		ws.onopen = function() {
 			console.log("Connected");
@@ -59,16 +60,22 @@ function sendMsgToServer(msg) {
 	}
 }
 
-// Function to get games from gameServer
+// TODO: Fix this shitty solution to fix message receive rate
+function sendMsgToGetMessages() {
+	sendMsgToServer("hi");
+}
+
+// Request updated games list
 function updateGamesList() {
 	sendMsgToServer("games");
 }
 
+// Update Games List after response
 function updateGamesListFromData(data) {
 	var games = JSON.parse(data);
 	$("#gamesList").html("");
 	for(var i=0; i<games.length; i++) {
-		$("#gamesList").append('<li><a href="#" onclick="joinGame(\''+games[i]+'\');">'+games[i]+'</a></li>');
+		$("#gamesList").append('<li><a href="#" onclick="joinGameFromClick(\''+games[i]+'\');">'+games[i]+'</a></li>');
 	}
 	
 	if(games.length==0) {
@@ -86,13 +93,20 @@ function setDelay(selectedDelay) {
 }
 
 // Function onClick game -> join/load game
+function joinGameFromClick(gameID) {
+	joinGame(gameID);
+	$('#delayPickerSelect :nth-child(1)').prop('selected', true); // Reset Move Delay Dropdown
+}
+
 function joinGame(gameID) {
-	currentGame = gameID
+	currentGame = gameID;
 	sendMsgToServer("join "+gameID);
 }
+
+// Sets Game Boards in their entirety
 function setGameBoards(data) { // data = [player1ID,player1Wins,player1Board,player2ID,player2Wins,player2Board]
 	var boards = JSON.parse(data);
-	console.log(boards);
+	
 	$(".gameID").text(currentGame);
 	player1 = boards[0]; $(".player1ID").text(player1.split("-")[0]);
 	$(".player1Wins").text("Wins: " + boards[1]);
@@ -128,7 +142,7 @@ function setGameBoards(data) { // data = [player1ID,player1Wins,player1Board,pla
 	console.log("Setting Board");
 }
 
-// Function receive data from gameServer
+// Updates Boards After Each Move
 function updateGameBoards(player,letter,number,moveResult) { // moveResult will be "Hit", "Sunk", or "Miss"
 	letter = parseInt(letter);
 	number = parseInt(number);
