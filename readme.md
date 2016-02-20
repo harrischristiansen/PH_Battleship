@@ -5,20 +5,15 @@ TODO
 -----------
 
 Anyone:  
-Front-end Design  
-Sample Code  
-	Java (Almost Complete - Goucheng)  
-	Python (Almost Complete - Harris)  
+Projector Page (Logo, Anvil Wifi Info, URL To Download Starter Code)  
+Starter Code  
 	C  
+	Seperate Code into 2 files, one containing placeShips and makeMove methods, other containing everything else (makes less scary)  
 
 Harris:  
 Require Team Abb To Be Unique  
-Add Game/Tournament Controls  
-Game AI for participants to play against   
-Make WebSockets refresh more often that once every 2 seconds  
-
-Questions:  
-Allow browser to see hidden ships? / Obfuscate boards for game viewer?  
+Manage Tournament Controls - Admin Side  
+Fix websocket delay  
 
 Dev Environment Setup Instructions
 -----------
@@ -32,7 +27,7 @@ Download and Install Composer
 Run `composer install` in the Site/backend directory (you might have to run `php composer.phar install` depending on how you installed composer)  
 Run `php artisan migrate` in the Site/backend directory  
 Run `php artisan key:generate` in the Site/backend directory  
-Run `mkdir Site/backend/storage/framework/sessions` and `mkdir Site/backend/storage/framework/views`  
+Run `mkdir -p Site/backend/storage/framework/sessions` and `mkdir -p Site/backend/storage/framework/views`  
 Run `chmod -R 777 Site/backend/storage`  
 Install pip  
 Run `pip install Autobahn --ignore-installed six`  
