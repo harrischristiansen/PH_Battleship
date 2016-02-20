@@ -30,7 +30,7 @@
 	<div class="row">
 		<div class="col-md-6">
 			<div class="board-container">
-				<h3><span class="player1ID">Player 1</span> - <span class="player1Wins"></span></h3>
+				<h3><span class="player1ID">Player 1</span> - <span class="player1Wins">Wins: 0</span></h3>
 				<table class="table table-bordered" id="player1">
 					<thead>
 						<tr>
@@ -140,7 +140,7 @@
 		</div>
 		<div class="col-md-6">
 			<div class="board-container">
-				<h3><span class="player2ID">Player 2</span> - <span class="player2Wins"></span></h3>
+				<h3><span class="player2ID">Player 2</span> - <span class="player2Wins">Wins: 0</span></h3>
 				<table class="table table-bordered" id="player2">
 					<thead>
 						<tr>
