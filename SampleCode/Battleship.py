@@ -8,6 +8,7 @@
 
 import sys
 import socket
+import time
 
 API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 
@@ -141,3 +142,4 @@ while True:
 	connectToServer()
 	if s != None:
 		gameMain()
+	time.sleep(1)
