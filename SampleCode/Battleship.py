@@ -54,13 +54,13 @@ def connectToServer():
 
 		s.send(API_KEY)
 		data = s.recv(1024)
+
+		if("False" in data):
+			s = None
+			print "Invalid API_KEY"
+			sys.exit()
 	except:
 		s = None
-
-	if("False" in data):
-		s = None
-		print "Invalid API_KEY"
-		sys.exit()
 
 
 destroyer=submarine=cruiser=battleship=carrier=("A0","A0")
