@@ -214,11 +214,11 @@ class BattleshipGame(threading.Thread):
 		if(self.gamePlaying):
 			if(max(max(r) for r in self.p1Ships) <= 0): # Player 2 Won
 				self.gamePlaying = False
-				content = urllib.request.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
+				content = urllib.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
 				self.p2Wins = self.p2Wins + 1
 			elif(max(max(r) for r in self.p2Ships) <= 0): # Player 1 Won
 				self.gamePlaying = False
-				content = urllib.request.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
+				content = urllib.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
 				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
@@ -232,12 +232,13 @@ class BattleshipGame(threading.Thread):
 			self.gamePlaying = True
 			self.p1Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
-			threading.Thread(target=self.placeShips,args=(self.p1,)).start()
-			threading.Thread(target=self.placeShips,args=(self.p2,)).start()
+			p1Thread = threading.Thread(target=self.placeShips,args=(self.p1,))
+			p1Thread.start()
+			p2Thread = threading.Thread(target=self.placeShips,args=(self.p2,))
+			p2Thread.start()
 
-			while(self.p1Ready==0 or self.p2Ready==0):
-				time.sleep(0.003)
-				continue
+			p1Thread.join() # Wait for Players to finish
+			p2Thread.join()
 
 			if(self.p1Ready==-1 or self.p2Ready==-1):
 				break
@@ -247,13 +248,15 @@ class BattleshipGame(threading.Thread):
 
 			while self.gamePlaying:
 				time.sleep(self.delayLength) # Adjustable Move Delay Length
-				self.p1Ready=self.p2Ready=0
-				threading.Thread(target=self.placeMove,args=(self.p1,)).start()
-				threading.Thread(target=self.placeMove,args=(self.p2,)).start()
 
-				while(self.p1Ready==0 or self.p2Ready==0):
-					time.sleep(0.003)
-					continue
+				self.p1Ready=self.p2Ready=0
+				p1Thread = threading.Thread(target=self.placeMove,args=(self.p1,))
+				p1Thread.start()
+				p2Thread = threading.Thread(target=self.placeMove,args=(self.p2,))
+				p2Thread.start()
+
+				p1Thread.join() # Wait for Players to finish
+				p2Thread.join()
 
 				if(self.p1Ready==-1 or self.p2Ready==-1):
 					break
@@ -263,9 +266,11 @@ class BattleshipGame(threading.Thread):
 			listener.sendMsg("closed")
 		games.remove(self)
 
-############################################ Web GUI Client ############################################
+############################################ Web Client ############################################
 
 class GameViewer(WebSocketServerProtocol):
+
+	QUEUED_WRITE_DELAY = 0.00001
 
 	def onConnect(self, request):
 		self.currentGame = -1
@@ -362,15 +367,15 @@ def getPlayer():
 
 	if not "API_KEY_HERE" in userID:
 		# Verify userID (API_KEY)
-		content = urllib.request.urlopen(API_URL+'auth/'+userID).read()
+		content = urllib.urlopen(API_URL+'auth/'+userID).read()
 		if "False" in content: # Invalid API_KEY
 			p.sendall("False\n")
 			p.close()
 			return
 		userID = content.strip("\r\n ")
 
-	userID = userID+"-"+str(addr[1])
 	print("Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID))
+	userID = userID+"-"+str(addr[1]) # Make userID unique to allow multiple connections from same team
 	try:
 		p.sendall("True\n") # Let Know Connection Successful
 	except:

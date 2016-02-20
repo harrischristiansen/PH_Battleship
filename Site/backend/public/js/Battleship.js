@@ -16,7 +16,7 @@ var player2 = -1;
 $(document).ready(function() {
 	if ("WebSocket" in window) {
 		ws = new WebSocket(gameServer);
-		window.setInterval(updateGamesList, 2000);
+		window.setInterval(updateGamesList, 200); // TODO: Fix this shitty solution to fix message receive rate
 		
 		ws.onopen = function() {
 			console.log("Connected");
@@ -31,9 +31,9 @@ $(document).ready(function() {
 			
 			if(msg_pieces[0] == "G") { // Receiving Games (G|JSON_games)
 				updateGamesListFromData(msg_pieces[1]);
-			} else if(msg_pieces[0] == "B") { // Receiving Board (B|JSON_board)
+			} else if(msg_pieces[0] == "B") { // Receiving Board (B|JSON_boards)
 				setGameBoards(msg_pieces[1]);
-			} else if(msg_pieces[0] == "M") { // Receiving Move (M|PlayerID|Letter|Number)
+			} else if(msg_pieces[0] == "M") { // Receiving Move (M|PlayerID|Letter|Number|MoveResult)
 				updateGameBoards(msg_pieces[1],msg_pieces[2],msg_pieces[3],msg_pieces[4]);
 			} else if(msg_pieces[0] == "rejoin") {
 				joinGame(currentGame);
@@ -90,7 +90,7 @@ function joinGame(gameID) {
 	currentGame = gameID
 	sendMsgToServer("join "+gameID);
 }
-function setGameBoards(data) {
+function setGameBoards(data) { // data = [player1ID,player1Wins,player1Board,player2ID,player2Wins,player2Board]
 	var boards = JSON.parse(data);
 	console.log(boards);
 	$(".gameID").text(currentGame);
