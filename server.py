@@ -24,6 +24,7 @@ from twisted.internet import reactor
 API_URL = "http://localhost:8888/api/"
 GAME_MODE = 0 # 0 = Normal, 1 = Tournament
 DEFAULT_DELAY_LENGTH = 1.001
+MOVE_TIMEOUT = 100
 PORT_GAME_SERVER = 23345
 PORT_GAME_LISTENER = 23346
 
@@ -273,7 +274,7 @@ class GameViewer(WebSocketServerProtocol):
 		self.sendMessage(msg, False)
 
 	def onMessage(self, payload, isBinary):
-		global games
+		global games, tournamentPairings, DEFAULT_DELAY_LENGTH, GAME_MODE
 
 		data = format(payload.decode('utf8'))
 
@@ -298,16 +299,33 @@ class GameViewer(WebSocketServerProtocol):
 					self.sendMsg("B|"+json.dumps([game.p1Obj[0],game.p1Ships,game.p2Obj[0],game.p2Ships]))
 					break
 
+		elif "masterDelay" in data:
+			DEFAULT_DELAY_LENGTH = float(data.split()[1])
+
 		elif "delay" in data:
 			for game in games:
 				if(game._Thread__ident == self.currentGame):
 					game.delayLength = float(data.split()[1])
 					break
 
+		elif "mode" in data:
+			GAME_MODE = int(data.split()[1])
+
+		elif "pair" in data:
+			player1 = data.split()[1]
+			player2 = data.split()[2]
+			for tournamentPair in tournamentPairings: # Remove Current Pairings For Both Teams
+				if player1 in tournamentPair or player2 in tournamentPair:
+					tournamentPairings.remove(tournamentPair)
+
+			pair = (player1,player2)
+			tournamentPairings.append(pair)
+
+
 	def onClose(self, wasClean, code, reason):
 		global games
 		for game in games:
-			if(game._Thread__ident == self.currentGame) and (self in game.listeners): # Maybe Modify to check every game for self in listeners list
+			if self in game.listeners:
 				game.listeners.remove(self)
 				break
 				
@@ -318,7 +336,7 @@ def getPlayer():
 	global freePlayers, players
 	p, addr = s.accept()
 	start_new_thread(getPlayer,()) # Be ready to accept next player
-	p.settimeout(100) # TODO: Set to 10
+	p.settimeout(MOVE_TIMEOUT) # Set Move Timeout
 
 	try:
 		userID = p.recv(1024)
@@ -352,6 +370,12 @@ def getPlayer():
 	players.append(player)
 	return
 
+def startMatch(player1, player2):
+	if player1!=None and player2!=None:
+		thread = BattleshipGame(player1,player2)
+		thread.setDaemon(True) # Set as background thread
+		thread.start()
+
 def startGameThread():
 	start_new_thread(getPlayer,())
 
@@ -364,34 +388,32 @@ def startGameThread():
 		if GAME_MODE == 0: # Normal Mode
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
+			startMatch(player1, player2)
 		elif GAME_MODE == 1: # Tournament Mode
-			for freePlayer in freePlayers:
-				opponentID = tournamentPairings.get(freePlayer[0])
-				if opponentID != None:
-					for freePlayer2  in freePlayers:
-						if freePlayer2[0] == opponentID:
-							player1 = freePlayer # TODO: Remove from freePlayers
-							player2 = freePlayer2 # TODO: Remove from freePlayers
-
-			player1 = freePlayers.pop()
-			player2 = freePlayers.pop()
-
-		if(player1!=None and player2!=None):
-			thread = BattleshipGame(player1,player2)
-			thread.setDaemon(True) # Set as background thread
-			thread.start()
+			for tournamentPair in tournamentPairings:
+				player1 = player2 = None
+				for freePlayer in freePlayers:
+					if tournamentPair[0] in freePlayer[0]:
+						player1 = freePlayer
+					elif tournamentPair[1] in freePlayer[0]:
+						player2 = freePlayer
+				if player1!=None and player2!=None: # Pair Found, Start Game
+					freePlayers.remove(player1)
+					freePlayers.remove(player2)
+					startMatch(player1,player2)
 
 	s.close()
 
+#################### Main ####################
+if __name__ == "__main__":
+	start_new_thread(startGameThread,())
 
-start_new_thread(startGameThread,())
 
-
-########## Start Web Sockets ##########
-# log.startLogging(sys.stdout)
-factory = WebSocketServerFactory(u"ws://127.0.0.1:23346", debug=False)
-factory.protocol = GameViewer
-# factory.setProtocolOptions(maxConnections=2)
-reactor.listenTCP(PORT_GAME_LISTENER, factory)
-reactor.run()
-## End WS ##
+	########## Start Web Sockets ##########
+	# log.startLogging(sys.stdout)
+	factory = WebSocketServerFactory(u"ws://127.0.0.1:"+str(PORT_GAME_LISTENER), debug=False)
+	factory.protocol = GameViewer
+	# factory.setProtocolOptions(maxConnections=2)
+	reactor.listenTCP(PORT_GAME_LISTENER, factory)
+	reactor.run()
+	## End WS ##

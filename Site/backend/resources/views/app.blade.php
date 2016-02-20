@@ -53,6 +53,9 @@
 		@endif
 		
 		<div class="container-fluid mainContentContainer">
+			@if(session()->get('loggedIn') == "true" && Request::path() != "game")
+				<br>
+			@endif
 			@if(session()->has('msg'))
 				<div class="alert alert-success" role="alert">{{session()->get('msg')}}</div>
 			@endif
