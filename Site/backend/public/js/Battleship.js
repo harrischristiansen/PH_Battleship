@@ -94,26 +94,26 @@ function setGameBoards(data) {
 	
 	for(var x=0; x<boards[1].length; x++) {
 		for(var y=0; y<boards[1][x].length; y++) {
-			$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[1][x][y]);
-			if (boards[1][x][y] === 10) {
+			$("#player1Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[1][x][y]);
+			if (boards[1][x][y] == -10) {
 				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
-			} else if (boards[1][x][y] === 0) {
-				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
 			} else if (boards[1][x][y] < 0) {
 				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
+			} else {
+				$("#player1 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
 			}
 		}
 	}
 	
 	for(var x=0; x<boards[3].length; x++) {
 		for(var y=0; y<boards[3][x].length; y++) {
-			$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[3][x][y]);
-			if (boards[3][x][y] === 10) {
+			$("#player2Raw tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").text(boards[3][x][y]);
+			if (boards[3][x][y] == -10) {
 				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-miss');
-			} else if (boards[3][x][y] === 0) {
-				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
 			} else if (boards[3][x][y] < 0) {
 				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-hit');
+			} else {
+				$("#player2 tr:nth-child("+(x+1)+") td:nth-child("+(y+2)+")").attr('class', 'status-none');
 			}
 		}
 	}
@@ -127,13 +127,23 @@ function updateGameBoards(player,letter,number,moveResult) { // moveResult will 
 	number = parseInt(number);
 	
 	if(player==player1) {
-		var currentNum = $("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
+		var currentNum = $("#player1Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
 		var newNum = 0 - Math.abs(parseInt(currentNum));
-		$("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
+		$("#player1Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
+		if(moveResult == "Hit" || moveResult == "Sunk") {
+			$("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").attr('class', 'status-hit');
+		} else if(moveResult == "Miss") {
+			$("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").attr('class', 'status-miss');
+		}
 	} else if(player==player2) {
-		var currentNum = $("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
+		var currentNum = $("#player2Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
 		var newNum = 0 - Math.abs(parseInt(currentNum));
-		$("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
+		$("#player2Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
+		if(moveResult == "Hit" || moveResult == "Sunk") {
+			$("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").attr('class', 'status-hit');
+		} else if(moveResult == "Miss") {
+			$("#player2 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").attr('class', 'status-miss');
+		}
 	} else {
 		joinGame(currentGame);
 	}

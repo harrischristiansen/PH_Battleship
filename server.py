@@ -73,9 +73,9 @@ class BattleshipGame(threading.Thread):
 			self.setClosed(p)
 
 	def setReady(self,p):
-		if(p is self.p1):
+		if p is self.p1:
 			self.p1Ready = 1
-		else:
+		elif p is self.p2:
 			self.p2Ready = 1
 
 	def setClosed(self,p):
@@ -169,16 +169,17 @@ class BattleshipGame(threading.Thread):
 		if(p is self.p1):
 			hit = self.p2Ships[c1[0]][c1[1]]
 			hitResult = ""
-			if(hit > 0):
-				self.p2Ships[c1[0]][c1[1]] = 0 - hit
+			if hit > 0: # Was A Hit
+				self.p2Ships[c1[0]][c1[1]] = 0 - hit # Mark As Hit
 				if any(hit in sublist for sublist in self.p2Ships):
 					self.sendMsgP(p,"Hit")
 					hitResult = "Hit"
-				else:
+				else: # Was Sunk (last occurance of ship in field)
 					self.sendMsgP(p,"Sunk")
 					hitResult = "Sunk"
 				self.checkGame()
-			else:
+			else: # Was A Miss
+				self.p2Ships[c1[0]][c1[1]] = -10 # Mark As Miss
 				self.sendMsgP(p,"Miss")
 				hitResult = "Miss"
 
@@ -188,16 +189,17 @@ class BattleshipGame(threading.Thread):
 		else:
 			hit = self.p1Ships[c1[0]][c1[1]]
 			hitResult = ""
-			if(hit > 0):
-				self.p1Ships[c1[0]][c1[1]] = 0 - hit
+			if hit > 0: # Was A Hit
+				self.p1Ships[c1[0]][c1[1]] = 0 - hit # Mark As Hit
 				if any(hit in sublist for sublist in self.p1Ships):
 					self.sendMsgP(p,"Hit")
 					hitResult = "Hit"
-				else:
+				else: # Was Sunk (last occurance of ship in field)
 					self.sendMsgP(p,"Sunk")
 					hitResult = "Sunk"
 				self.checkGame()
-			else:
+			else: # Was A Miss
+				self.p1Ships[c1[0]][c1[1]] = -10 # Mark As Miss
 				self.sendMsgP(p,"Miss")
 				hitResult = "Miss"
 				
@@ -209,11 +211,11 @@ class BattleshipGame(threading.Thread):
 
 	def checkGame(self):
 		if(self.gamePlaying):
-			if(max(max(l) for l in self.p1Ships) <= 0):
+			if(max(max(r) for r in self.p1Ships) <= 0):
 				# Player 2 Won
 				self.gamePlaying = False
 				content = urllib2.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
-			if(max(max(l) for l in self.p2Ships) <= 0):
+			if(max(max(r) for r in self.p2Ships) <= 0):
 				# Player 1 Won
 				self.gamePlaying = False
 				content = urllib2.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
@@ -300,16 +302,25 @@ class GameViewer(WebSocketServerProtocol):
 					break
 
 		elif "masterDelay" in data:
-			DEFAULT_DELAY_LENGTH = float(data.split()[1])
+			try:
+				DEFAULT_DELAY_LENGTH = float(data.split()[1])
+			except:
+				None
 
 		elif "delay" in data:
 			for game in games:
 				if(game._Thread__ident == self.currentGame):
-					game.delayLength = float(data.split()[1])
+					try:
+						game.delayLength = float(data.split()[1])
+					except:
+						None
 					break
 
 		elif "mode" in data:
-			GAME_MODE = int(data.split()[1])
+			try:
+				GAME_MODE = int(data.split()[1])
+			except:
+				None
 
 		elif "pair" in data:
 			player1 = data.split()[1]

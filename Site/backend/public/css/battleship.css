@@ -159,6 +159,11 @@ body {
   color: #345A6C;
 }
 
+#delayPicker {
+	float: right;
+	
+}
+
 .main .table {
   background-color: #ECF0F1;
   border-radius: 4px;

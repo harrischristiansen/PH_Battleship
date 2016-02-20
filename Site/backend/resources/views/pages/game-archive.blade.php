@@ -16,7 +16,7 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<h1>Game <span class="gameID"></span>: <span class="player1ID"></span> vs <span class="player2ID"></span></h1>
 	
-	<table class="table table-bordered" style="float: left; width: 49%;" id="player1">
+	<table class="table table-bordered" style="float: left; width: 49%;" id="player1Raw">
 		<thead>
 			<tr>
 				<th class="player1ID">Player 1</th>
@@ -122,7 +122,7 @@
 		</tbody>
 	</table>
 	
-	<table class="table table-bordered" style="width: 49%; float: right;" id="player2">
+	<table class="table table-bordered" style="width: 49%; float: right;" id="player2Raw">
 		<thead>
 			<tr>
 				<th class="player2ID">Player 2</th>

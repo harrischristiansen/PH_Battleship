@@ -14,7 +14,17 @@
 </div>
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<h1>Game <span class="gameID"></span>: <span class="player1ID"></span> vs <span class="player2ID"></span></h1>
+	<h1>
+		<span class="player1ID"></span> vs <span class="player2ID"></span>
+		<div id="delayPicker">
+			<select>
+				<option value="0.002">None</option>
+				<option value="1.0">1 Second</option>
+				<option value="2.0">2 Seconds</option>
+				<option value="4.0">4 Seconds</option>
+			</select>
+		</div>
+	</h1>
 
 	<div class="row">
 		<div class="col-md-6">

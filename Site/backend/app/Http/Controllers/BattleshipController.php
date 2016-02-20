@@ -122,7 +122,7 @@ class BattleshipController extends Controller {
 		return view('pages.game');
 	}
 
-	public function getGameorig() {
+	public function getGameRaw() {
 		return view('pages.game-archive');
 	}
 
