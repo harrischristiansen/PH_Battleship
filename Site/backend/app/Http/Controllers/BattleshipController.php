@@ -42,7 +42,6 @@ class BattleshipController extends Controller {
 	
 	// Create Team
 	public function postCreateTeam(LoggedInRequest $request) {
-
 		if(Team::where('abb',$request->input('teamAbb'))->first())
 		{
 			$request->session()->flash('msg', 'That abbreviation has been taken!!');

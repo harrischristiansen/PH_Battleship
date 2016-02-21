@@ -18,7 +18,7 @@ from twisted.python import log
 from twisted.internet import reactor
 ## End WS ##
 
-############################################ Socket Connection ############################################
+############################################ Socket Server ############################################
 
 API_URL = "http://localhost:8888/api/"
 GAME_MODE = 0 # 0 = Normal, 1 = Tournament
@@ -37,7 +37,7 @@ players = []
 freePlayers = []
 tournamentPairings = []
 
-############################################ Battleship Game Logic ############################################
+############################################ Battleship Game Thread ############################################
 
 class BattleshipGame(threading.Thread):
 	def __init__(self,p1,p2):
