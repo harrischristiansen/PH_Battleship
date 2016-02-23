@@ -11,7 +11,6 @@ import threading
 import json
 import urllib
 import random
-from Crypto.Cipher import AES
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
@@ -35,7 +34,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Make Address Reusable 
 s.listen(20)
 
 games = []
-players = []
+players = [] # Player = ("ABB-threadID", socket_con_object)
 freePlayers = []
 tournamentPairings = []
 
@@ -70,16 +69,8 @@ class BattleshipGame(threading.Thread):
 			self.endGame()
 
 	def recvMsg(self,p):
-		if p is self.p1:
-			decryption_suite = self.p1Obj[2]
-		elif p is self.p2:
-			decryption_suite = self.p2Obj[2]
-		else:
-			return ""
-
 		data = p.recv(2)
 		return data
-		#return decryption_suite.decrypt(data)
 
 	def sendMsgP(self,p,msg):
 		try:
@@ -239,7 +230,7 @@ class BattleshipGame(threading.Thread):
 				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
-		global games, players, GAME_MODE
+		global games, players, GAME_MODE, freePlayers
 		games.append(self)
 
 		while self.playersConnected:
@@ -278,10 +269,12 @@ class BattleshipGame(threading.Thread):
 				if(self.p1Ready==-1 or self.p2Ready==-1):
 					break
 
-			if GAME_MODE == 1: # Random Matches
-				self.endGame()
+			if GAME_MODE == 1: # Random Matches, End current game, put players back in free list
+				self.playersConnected = False
+				freePlayers.append(self.p1)
+				time.sleep(0.15) # Wait before adding second
+				freePlayers.append(self.p2)
 
-		print("Game Ended")
 		for listener in self.listeners: # Tell GameViewers that game is closed
 			listener.sendMsg("closed")
 		games.remove(self)
@@ -351,7 +344,7 @@ class GameViewer(WebSocketServerProtocol):
 			except:
 				None
 
-		elif "pair" in data: # Pair 2 Teams Together
+		elif "pair" in data: # Pair 2 Teams Together By Abbreviation
 			player1 = data.split()[1]
 			player2 = data.split()[2]
 			for tournamentPair in tournamentPairings: # Remove Current Pairings For Both Teams
@@ -409,8 +402,7 @@ def getPlayer():
 	except:
 		p.close()
 
-	decryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
-	player = (userID,p,decryption_suite)
+	player = (userID,p)
 	freePlayers.append(player)
 	players.append(player)
 	return
@@ -431,10 +423,10 @@ def startGameThread():
 			time.sleep(0.1)
 			continue
 
-		if GAME_MODE == 0 # Normal Mode
+		if GAME_MODE == 0: # Normal Mode
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
-		if GAME_MODE == 1 # Random Mode
+		if GAME_MODE == 1: # Random Mode
 			while(len(freePlayers)<4):
 				time.sleep(0.1)
 				continue

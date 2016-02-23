@@ -41,13 +41,21 @@ function setTournamentMode(selectedMode) {
 	if(selectedMode == "N") { // Normal Mode
 		setMasterDelay("0.2");
 		sendMsgToServer("mode 0");
+	} else if(selectedMode == "R") { // Random Mode
+		setMasterDelay("0.2");
+		sendMsgToServer("mode 1");
+		sendMsgToServer("reset"); // End all current games
 	} else if(selectedMode == "T") { // Tournament Mode
 		setMasterDelay("1.0");
-		sendMsgToServer("mode 1");
+		sendMsgToServer("mode 2");
 		sendMsgToServer("reset"); // End all current games
 	}
 }
 
 function setMasterDelay(selectedDelay) {
 	sendMsgToServer("masterDelay "+selectedDelay);
+}
+
+function setPair(player1, player2) { // Pair two players by abbreviation
+	sendMsgToServer("pair "+player1+" "+player2);
 }

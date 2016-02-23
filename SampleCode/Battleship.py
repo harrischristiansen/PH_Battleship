@@ -9,7 +9,6 @@
 import sys
 import socket
 import time
-#from Crypto.Cipher import AES
 
 API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 
@@ -49,8 +48,7 @@ def makeMove():
 ############################## ^^^^^ PUT YOUR CODE ABOVE HERE ^^^^^ ##############################
 
 def sendMsg(msg):
-	global s, encryption_suite
-	#msg = encryption_suite.encrypt(msg)
+	global s
 	try:
 		s.send(msg)
 	except:
@@ -149,7 +147,6 @@ def placeMove(pos):
 		dataPassthrough = data
 		return "Miss"
 
-#encryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 while True:
 	connectToServer()
 	if s != None:
