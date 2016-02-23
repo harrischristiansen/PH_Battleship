@@ -403,7 +403,7 @@ def getPlayer():
 	try:
 		p.sendall("True\n") # Let Know Connection Successful
 	except:
-		p.close()	
+		p.close()
 
 	decryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 	player = (userID,p,decryption_suite)

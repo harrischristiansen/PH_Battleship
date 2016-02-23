@@ -9,6 +9,7 @@
 import sys
 import socket
 import time
+from Crypto.Cipher import AES
 
 API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 
@@ -47,13 +48,21 @@ def makeMove():
 
 ############################## ^^^^^ PUT YOUR CODE ABOVE HERE ^^^^^ ##############################
 
+def sendMsg(msg):
+	global s, encryption_suite
+	#msg = encryption_suite.encrypt(msg)
+	try:
+		s.send(msg)
+	except:
+		s = None
+
 def connectToServer():
 	global s
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((GAME_SERVER, 23345))
 
-		s.send(API_KEY)
+		sendMsg(API_KEY)
 		data = s.recv(1024)
 
 		if("False" in data):
@@ -71,6 +80,8 @@ def gameMain():
 	global s, dataPassthrough
 	while True:
 		if(dataPassthrough == None):
+			if s == None:
+				return
 			data = s.recv(1024)
 		else:
 			data = dataPassthrough
@@ -84,20 +95,20 @@ def gameMain():
 			welcomeMsg = data.split(":")
 			placeShips(welcomeMsg[1])
 		elif "Destroyer" in data: # Destroyer(2)
-			s.send(destroyer[0])
-			s.send(destroyer[1])
+			sendMsg(destroyer[0])
+			sendMsg(destroyer[1])
 		elif "Submarine" in data: # Submarine(3)
-			s.send(submarine[0])
-			s.send(submarine[1])
+			sendMsg(submarine[0])
+			sendMsg(submarine[1])
 		elif "Cruiser" in data: # Cruiser(3)
-			s.send(cruiser[0])
-			s.send(cruiser[1])
+			sendMsg(cruiser[0])
+			sendMsg(cruiser[1])
 		elif "Battleship" in data: # Battleship (4)
-			s.send(battleship[0])
-			s.send(battleship[1])
+			sendMsg(battleship[0])
+			sendMsg(battleship[1])
 		elif "Carrier" in data: # Carrier(3)
-			s.send(carrier[0])
-			s.send(carrier[1])
+			sendMsg(carrier[0])
+			sendMsg(carrier[1])
 		elif "Enter" in data: # Enter Coordinates
 			makeMove()
 		elif "Error" in data: # Error: xxx
@@ -126,7 +137,7 @@ def placeCarrier(startPos, endPos):
 
 def placeMove(pos):
 	global dataPassthrough
-	s.send(pos)
+	sendMsg(pos)
 	data = s.recv(1024)
 	if "Hit" in data:
 		return "Hit"
@@ -138,6 +149,7 @@ def placeMove(pos):
 		dataPassthrough = data
 		return "Miss"
 
+encryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 while True:
 	connectToServer()
 	if s != None:
