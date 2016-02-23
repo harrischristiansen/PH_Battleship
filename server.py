@@ -10,6 +10,7 @@ import time
 import threading
 import json
 import urllib
+import random
 from Crypto.Cipher import AES
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
@@ -22,7 +23,7 @@ from twisted.internet import reactor
 ############################################ Socket Server ############################################
 
 API_URL = "http://localhost:8888/api/"
-GAME_MODE = 0 # 0 = Normal, 1 = Tournament
+GAME_MODE = 0 # 0 = Normal, 1 = Random, 2 = Tournament
 DEFAULT_DELAY_LENGTH = 1.001
 MOVE_TIMEOUT = 100
 PORT_GAME_SERVER = 23345
@@ -238,7 +239,7 @@ class BattleshipGame(threading.Thread):
 				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
-		global games, players
+		global games, players, GAME_MODE
 		games.append(self)
 
 		while self.playersConnected:
@@ -276,6 +277,9 @@ class BattleshipGame(threading.Thread):
 
 				if(self.p1Ready==-1 or self.p2Ready==-1):
 					break
+
+			if GAME_MODE == 1: # Random Matches
+				self.endGame()
 
 		print("Game Ended")
 		for listener in self.listeners: # Tell GameViewers that game is closed
@@ -421,16 +425,24 @@ def startGameThread():
 	threading.Thread(target=getPlayer).start()
 
 	while True:
+		player1 = player2 = None
+
 		while(len(freePlayers)<2):
 			time.sleep(0.1)
 			continue
 
-		player1 = player2 = None
-		if GAME_MODE == 0: # Normal Mode
+		if GAME_MODE == 0 # Normal Mode
+			player1 = freePlayers.pop()
+			player2 = freePlayers.pop()
+		if GAME_MODE == 1 # Random Mode
+			while(len(freePlayers)<4):
+				time.sleep(0.1)
+				continue
+			random.shuffle(freePlayers)
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
 			startMatch(player1, player2)
-		elif GAME_MODE == 1: # Tournament Mode
+		elif GAME_MODE == 2: # Tournament Mode
 			for tournamentPair in tournamentPairings:
 				player1 = player2 = None
 				for freePlayer in freePlayers:
