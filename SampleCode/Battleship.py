@@ -9,7 +9,7 @@
 import sys
 import socket
 import time
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 
 API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 
@@ -149,7 +149,7 @@ def placeMove(pos):
 		dataPassthrough = data
 		return "Miss"
 
-encryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+#encryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
 while True:
 	connectToServer()
 	if s != None:
