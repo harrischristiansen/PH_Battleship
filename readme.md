@@ -30,6 +30,7 @@ Run `chmod -R 777 Site/backend/storage`
 Install pip  
 Run `pip install Autobahn --ignore-installed six`  
 Run `pip install twisted`  
+Run `pip install pycrypto`  
 
 Dev Environment Run Instructions
 -----------

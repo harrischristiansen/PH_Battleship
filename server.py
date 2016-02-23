@@ -2,7 +2,7 @@
 	@ Harris Christiansen (Harris@HarrisChristiansen.com)
 	2016-01-24
 	For: Purdue Hackers - Battleship
-	Battleship Server - Written in Python
+	Battleship Server - Python
 '''
 
 import socket
@@ -10,6 +10,7 @@ import time
 import threading
 import json
 import urllib
+from Crypto.Cipher import AES
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
@@ -67,6 +68,18 @@ class BattleshipGame(threading.Thread):
 		except:
 			self.endGame()
 
+	def recvMsg(self,p):
+		if p is self.p1:
+			decryption_suite = self.p1Obj[2]
+		elif p is self.p2:
+			decryption_suite = self.p2Obj[2]
+		else:
+			return ""
+
+		data = p.recv(2)
+		return data
+		#return decryption_suite.decrypt(data)
+
 	def sendMsgP(self,p,msg):
 		try:
 			p.sendall(msg+"\n")
@@ -97,7 +110,7 @@ class BattleshipGame(threading.Thread):
 
 	def getCord(self,p):
 		try:
-			data = p.recv(2)
+			data = self.recvMsg(p)
 		except: # Timeout
 			print("Error: Timeout Receiving Coord, Ending Game")
 			self.endGame()
@@ -366,18 +379,19 @@ def getPlayer():
 	p.settimeout(MOVE_TIMEOUT) # Set Move Timeout
 
 	try:
-		userID = p.recv(1024)
-		if not userID: # Client Closed Connection
+		apikey = p.recv(1024)
+		if not apikey: # Client Closed Connection
 			p.close()
 			return
-		userID = userID.strip("\r\n ")
+		apikey = apikey.strip("\r\n ")
 	except: # Timed Out
 		p.close()
 		return
 
-	if not "API_KEY_HERE" in userID:
-		# Verify userID (API_KEY)
-		content = urllib.urlopen(API_URL+'auth/'+userID).read()
+	userID = "NO ID"
+	if not "API_KEY_HERE" in apikey:
+		# Verify API_KEY
+		content = urllib.urlopen(API_URL+'auth/'+apikey).read()
 		if "False" in content: # Invalid API_KEY
 			p.sendall("False\n")
 			p.close()
@@ -389,10 +403,10 @@ def getPlayer():
 	try:
 		p.sendall("True\n") # Let Know Connection Successful
 	except:
-		p.close()
-		
+		p.close()	
 
-	player = (userID,p)
+	decryption_suite = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+	player = (userID,p,decryption_suite)
 	freePlayers.append(player)
 	players.append(player)
 	return
