@@ -23,7 +23,7 @@
 					</select>
 			    </div>
 			    <div class="col-sm-1">
-				    <button href="#" onclick="resetAll();">Reset All</button>
+				    <button href="#" class="btn btn-danger" onclick="resetAll();">Reset</button>
 			    </div>
 			</div>
 			<div class="form-group">
@@ -50,8 +50,16 @@
 					<div id="pairError" style="color: red;"></div>
 			    </div>
 			    <div class="col-sm-1">
-				    <button href="#" onclick="setPair();">Pair</button>
+				    <button href="#" class="btn btn-success" onclick="setPair();">Pair</button>
 			    </div>
+			</div>
+			<div class="form-group">
+				<table class="table table-condensed" style="width: 200px; margin-left: auto; margin-right: auto;">
+					<thead style="font-weight: bold;">
+						<tr><td>Pairs</td> <td></td></tr>
+					</thead>
+					<tbody id="pairsList"></tbody>
+				</table>
 			</div>
 		</div>
 	</div>

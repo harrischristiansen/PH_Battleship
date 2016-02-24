@@ -12,6 +12,7 @@ var ws = null;
 $(document).ready(function() {
 	if ("WebSocket" in window) {
 		ws = new WebSocket(GAME_SERVER);
+		window.setInterval(updatePairs, 3000);
 		
 		ws.onopen = function() {
 			console.log("Connected");
@@ -19,7 +20,13 @@ $(document).ready(function() {
 		
 		ws.onmessage = function (evt) { 
 			var received_msg = evt.data;
-			console.log("Received: "+received_msg);
+			var msg_pieces = received_msg.split("|");
+			
+			if(msg_pieces[0] == "P") {
+				updatePairsFromData(msg_pieces[1]);
+			} else {
+				console.log("Received: "+received_msg);
+			}
 		};
 		
 		ws.onclose = function() { 
@@ -37,12 +44,27 @@ function sendMsgToServer(msg) {
 	}
 }
 
+function updatePairs() {
+	sendMsgToServer("listPairs");
+}
+
+function updatePairsFromData(data) {
+	var pairs = JSON.parse(data);
+	$("#pairsList").html("");
+	for(var i=0; i<pairs.length; i++) {
+		$("#pairsList").append('<tr><td>'+pairs[i][0]+'</td><td>'+pairs[i][1]+'</td></tr>');
+	}
+	if(pairs.length==0) {
+		$("#pairsList").append('<tr><td>-</td><td>-</td></tr>');
+	}
+}
+
 function setTournamentMode(selectedMode) {
 	if(selectedMode == "N") { // Normal Mode
 		setMasterDelay("0.2");
 		sendMsgToServer("mode 0");
 	} else if(selectedMode == "R") { // Random Mode
-		setMasterDelay("0.2");
+		setMasterDelay("0.002");
 		sendMsgToServer("mode 1");
 		sendMsgToServer("reset"); // End all current games
 	} else if(selectedMode == "T") { // Tournament Mode
@@ -65,9 +87,10 @@ function setPair() { // Pair two players by abbreviation
 		$("#pairError").text("");
 	}
 	sendMsgToServer("pair "+players[0]+" "+players[1]);
+	updatePairs();
 }
 
 function resetAll() { // Reset/Delete all Game History
 	sendMsgToServer("reset"); // End all current games
-	// TODO: Request API Reset
+	$.get("/api/reset");
 }

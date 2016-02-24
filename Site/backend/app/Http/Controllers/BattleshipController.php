@@ -9,6 +9,7 @@ use App\Http\Requests\LoggedInRequest;
 use App\Http\Controllers\Controller;
 
 use App\Models\Team;
+use App\Models\Game;
 
 class BattleshipController extends Controller {
     
@@ -42,8 +43,7 @@ class BattleshipController extends Controller {
 	
 	// Create Team
 	public function postCreateTeam(LoggedInRequest $request) {
-		if(Team::where('abb',$request->input('teamAbb'))->first())
-		{
+		if(Team::where('abb',$request->input('teamAbb'))->first()) {
 			$request->session()->flash('msg', 'That abbreviation has been taken!!');
 			return $this->getCreateTeam($request);
 		}
@@ -72,6 +72,12 @@ class BattleshipController extends Controller {
 		$team->name = $request->input('teamName');
 		$team->abb = strtoupper($request->input('teamAbb'));
 		if($request->input('delete')=="delete") {
+			$games = Game::all();
+			foreach($games as $game) {
+				if($game->winner == $team->team_key || $game->loser == $team->team_key) {
+					$game->delete();
+				}
+			}
 			$team->delete();
 			$request->session()->flash('msg', 'Team '.$team->name.' deleted!');
 		} else if($request->input('reset')=="reset") {

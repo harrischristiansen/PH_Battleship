@@ -10,7 +10,8 @@ import sys
 import socket
 import time
 
-API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
+#API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
+API_KEY = sys.argv[1]
 
 GAME_SERVER = "127.0.0.1"
 
@@ -56,6 +57,7 @@ def sendMsg(msg):
 
 def connectToServer():
 	global s
+	invalidKey = False
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((GAME_SERVER, 23345))
@@ -66,9 +68,12 @@ def connectToServer():
 		if("False" in data):
 			s = None
 			print "Invalid API_KEY"
-			sys.exit()
+			invalidKey = True
 	except:
 		s = None
+
+	if invalidKey:
+		sys.exit()
 
 
 destroyer=submarine=cruiser=battleship=carrier=("A0","A0")

@@ -75,14 +75,14 @@ function updateGamesListFromData(data) {
 	var games = JSON.parse(data);
 	$("#gamesList").html("");
 	for(var i=0; i<games.length; i++) {
-		$("#gamesList").append('<li><a href="#" onclick="joinGameFromClick(\''+games[i]+'\');">'+games[i]+'</a></li>');
+		$("#gamesList").append('<li><a href="#" onclick="joinGameFromClick(\''+games[i][0]+'\');">'+games[i][1]+' vs '+games[i][2]+'</a></li>');
 	}
 	
 	if(games.length==0) {
 		$("#gamesList").append('<li><a href="#">No Active Games</a></li>');
 	} else { // At least 1 game exists, join
 		if(currentGame == -1) {
-			joinGame(games[0]);
+			joinGame(games[0][0]);
 		}
 	}
 }

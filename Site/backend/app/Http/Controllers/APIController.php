@@ -49,5 +49,16 @@ class APIController extends Controller {
 
 		return "Ok";
 	}
+	
+	public function getReset() {
+		$teams = Team::all();
+		foreach($teams as $team) {
+			$team->games=0;
+			$team->wins=0;
+			$team->save();
+		}
+		
+		return "Ok";
+	}
     
 }

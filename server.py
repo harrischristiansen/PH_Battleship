@@ -35,7 +35,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Make Address Reusable 
 s.listen(20)
 
 games = []
-players = [] # Player = ("ABB-threadID", socket_con_object)
+players = [] # Player = ("ABBR-threadID", socket_con_object, "ABBR")
 freePlayers = []
 tournamentPairings = []
 
@@ -236,11 +236,11 @@ class BattleshipGame(threading.Thread):
 		if(self.gamePlaying):
 			if(max(max(r) for r in self.p1Ships) <= 0): # Player 2 Won
 				self.gamePlaying = False
-				content = urllib.urlopen(API_URL+'game/'+self.p2Obj[0]+"/"+self.p1Obj[0]).read()
+				content = urllib.urlopen(API_URL+'game/'+self.p2Obj[2]+"/"+self.p1Obj[2]).read()
 				self.p2Wins = self.p2Wins + 1
 			elif(max(max(r) for r in self.p2Ships) <= 0): # Player 1 Won
 				self.gamePlaying = False
-				content = urllib.urlopen(API_URL+'game/'+self.p1Obj[0]+"/"+self.p2Obj[0]).read()
+				content = urllib.urlopen(API_URL+'game/'+self.p1Obj[2]+"/"+self.p2Obj[2]).read()
 				self.p1Wins = self.p1Wins + 1
 
 	def run(self):
@@ -319,7 +319,7 @@ class GameViewer(WebSocketServerProtocol):
 		if "games" in data:
 			gameIDs = []
 			for game in games:
-				gameIDs.append(game._Thread__ident)
+				gameIDs.append([game._Thread__ident, game.p1Obj[2], game.p2Obj[2]])
 
 			self.sendMsg("G|"+json.dumps(gameIDs));
 
@@ -330,7 +330,11 @@ class GameViewer(WebSocketServerProtocol):
 					game.listeners.remove(self)
 					break
 
-			self.currentGame = int(data.split()[1])
+			try: # Set Current Game
+				self.currentGame = int(data.split()[1])
+			except:
+				None
+
 			for game in games:
 				if(game._Thread__ident == self.currentGame):
 					game.listeners.append(self)
@@ -356,23 +360,30 @@ class GameViewer(WebSocketServerProtocol):
 					break
 
 		elif "mode" in data:
+			tournamentPairings = []
 			try:
 				GAME_MODE = int(data.split()[1])
 			except:
 				None
 
+		elif "listPairs" in data:
+			self.sendMsg("P|"+json.dumps(tournamentPairings));
+
 		elif "pair" in data: # Pair 2 Teams Together By Abbreviation
 			player1 = data.split()[1]
 			player2 = data.split()[2]
-			for tournamentPair in tournamentPairings: # Remove Current Pairings For Both Teams
+			for tournamentPair in tournamentPairings[:]: # Remove Current Pairings For Both Teams
 				if player1 in tournamentPair or player2 in tournamentPair:
 					tournamentPairings.remove(tournamentPair)
+			for game in games[:]: # End All Games Players Are Participating In
+				if player1 in game.p1Obj or player1 in game.p2Obj or player2 in game.p1Obj or player2 in game.p2Obj:
+					game.endGameAndClose()
 
 			pair = (player1,player2)
 			tournamentPairings.append(pair)
 
 		elif "reset" in data: # End All Games
-			for game in games:
+			for game in games[:]:
 				game.endGameAndClose()
 
 
@@ -414,13 +425,13 @@ def getPlayer():
 
 	if DEBUG_ENABLED:
 		print("Client Connected: " + addr[0] + ":" + str(addr[1]) + " - " + str(userID))
-	userID = userID+"-"+str(addr[1]) # Make userID unique to allow multiple connections from same team
+	userIDUnique = userID+"-"+str(addr[1]) # Make userID unique to allow multiple connections from same team
 	try:
 		p.sendall("True\n") # Let Know Connection Successful
 	except:
 		p.close()
 
-	player = (userID,p)
+	player = (userIDUnique,p,userID)
 	freePlayers.append(player)
 	players.append(player)
 	return
@@ -452,6 +463,9 @@ def startGameThread():
 			random.shuffle(freePlayers)
 			player1 = freePlayers.pop()
 			player2 = freePlayers.pop()
+			if(player1[2] == player2[2]):
+				time.sleep(0.05)
+				continue
 			startMatch(player1, player2)
 		elif GAME_MODE == 2: # Tournament Mode
 			for tournamentPair in tournamentPairings:
