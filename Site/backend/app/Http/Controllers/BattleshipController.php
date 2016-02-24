@@ -107,7 +107,12 @@ class BattleshipController extends Controller {
 	}
 	
 	public function getManage(LoggedInRequest $request) {
-		return view('pages.tournament');
+		$teams = DB::table('teams')
+                 ->select(DB::raw('*, (wins / games) as win_percent'))
+                 ->orderBy('win_percent','DESC')
+                 ->get();
+        
+		return view('pages.tournament',compact('teams'));
 	}
 	
 	/////////////////////////////// Game Viewer ///////////////////////////////

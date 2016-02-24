@@ -56,6 +56,18 @@ function setMasterDelay(selectedDelay) {
 	sendMsgToServer("masterDelay "+selectedDelay);
 }
 
-function setPair(player1, player2) { // Pair two players by abbreviation
-	sendMsgToServer("pair "+player1+" "+player2);
+function setPair() { // Pair two players by abbreviation
+	players = $("#makePair").val();
+	console.log(players);
+	if(players == null || players.length != 2) {
+		$("#pairError").text("Please select only 2 teams");
+	} else {
+		$("#pairError").text("");
+	}
+	sendMsgToServer("pair "+players[0]+" "+players[1]);
+}
+
+function resetAll() { // Reset/Delete all Game History
+	sendMsgToServer("reset"); // End all current games
+	// TODO: Request API Reset
 }
