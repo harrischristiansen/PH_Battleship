@@ -21,7 +21,7 @@ from twisted.internet import reactor
 
 ############################################ Socket Server ############################################
 
-API_URL = "http://localhost:8888/api/"
+API_URL = "http://battleship.purduehackers.com/api/"
 DEBUG_ENABLED = True
 GAME_MODE = 0 # 0 = Normal, 1 = Random, 2 = Tournament
 DEFAULT_DELAY_LENGTH = 0.2
@@ -256,7 +256,7 @@ class BattleshipGame(threading.Thread):
 			self.p1ShipsViewer = [[0 for x in range(8)] for x in range(8)]
 			self.p2Ships = [[0 for x in range(8)] for x in range(8)]
 			self.p2ShipsViewer = [[0 for x in range(8)] for x in range(8)]
-			p1Thread = threading.Thread(target=self.placeShips,args=(self.p1,))
+			p1Thread = threading.Thread(target=self.placeShips,args=(self.p1,)) # Place Ships
 			p2Thread = threading.Thread(target=self.placeShips,args=(self.p2,))
 			p1Thread.start()
 			p2Thread.start()

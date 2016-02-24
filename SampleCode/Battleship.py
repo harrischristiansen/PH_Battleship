@@ -13,7 +13,7 @@ import time
 #API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
 API_KEY = sys.argv[1]
 
-GAME_SERVER = "127.0.0.1"
+GAME_SERVER = "battleshipgs.purduehackers.com"
 
 ##############################  PUT YOUR CODE HERE ##############################
 
@@ -52,6 +52,7 @@ def sendMsg(msg):
 	global s
 	try:
 		s.send(msg)
+		print("Sent:"+msg)
 	except:
 		s = None
 
@@ -93,10 +94,14 @@ def gameMain():
 		if not data:
 			s.close()
 			return
+
+		print("Received:"+data)
 		
 		if "Welcome" in data: # "Welcome To Battleship! You Are Playing:xxxx"
 			welcomeMsg = data.split(":")
 			placeShips(welcomeMsg[1])
+			if "Destroyer" in data: # Only Place Can Receive Double Message, Pass Through
+				dataPassthrough = "Destroyer(2):"
 		elif "Destroyer" in data: # Destroyer(2)
 			sendMsg(destroyer[0])
 			sendMsg(destroyer[1])

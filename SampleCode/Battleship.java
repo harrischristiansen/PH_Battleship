@@ -128,51 +128,50 @@ public class Battleship {
 				String[] welcomeMsg = this.data.split(":");
 				placeShips(welcomeMsg[1]);
 				System.out.println("Placed Ships");
+				if (data.contains("Destroyer")) { // Only Place Can Receive Double Message, Pass Through
+					this.dataPassthrough = "Destroyer(2):";
+				}
 			}
 			else if (data.contains("Destroyer")) {
 				this.out.print(destroyer[0]);
 				this.out.print(destroyer[1]);
 				out.flush();
-				System.out.println("Send Destroyers");
+				System.out.println("Sent Destroyers");
 			}
 			else if (data.contains("Submarine")) {
 				this.out.print(submarine[0]);
 				this.out.print(submarine[1]);
 				out.flush();
-				System.out.println("Send Submarines");
+				System.out.println("Sent Submarines");
 			}
 			else if (data.contains("Cruiser")) {
 				this.out.print(cruiser[0]);
 				this.out.print(cruiser[1]);
 				out.flush();
-				System.out.println("Send Cruisers");
+				System.out.println("Sent Cruisers");
 			}
 			else if (data.contains("Battleship")) {
 				this.out.print(battleship[0]);
 				this.out.print(battleship[1]);
 				out.flush();
-				System.out.println("Send Battlehsips");
+				System.out.println("Sent Battlehsips");
 			}
 			else if (data.contains("Carrier")) {
 				this.out.print(carrier[0]);
 				this.out.print(carrier[1]);
 				out.flush();
-				System.out.println("Send Carriers");
+				System.out.println("Sent Carriers");
 			}
 			else if (data.contains( "Enter")) {
 				this.makeMove();
 				System.out.println("Made Move");
 			}
 			else if (data.contains("Error" )) {
-				out.print("Received Error");
-				out.flush();
-				System.out.println("Send Error");
+				System.out.println("Received Error: " + data);
 				System.exit(1); // Exit sys when there is an error
 			}
 			else {
-				out.print("Recieved Unknown Responce:" + data);
-				out.flush();
-				System.out.println("Send Destroyer");
+				System.out.println("Recieved Unknown Responce:" + data);
 				System.exit(1); // Exit sys when there is an unknown responce
 			}
 		}
