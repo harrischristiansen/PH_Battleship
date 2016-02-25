@@ -119,6 +119,9 @@ def gameMain():
 		elif "Error" in data: # Error: xxx
 			print("Received Error: "+data)
 			sys.exit()
+		elif "Hit" in data or "Miss" in data or "Sunk" in data:
+			print("Error: Please Make Only 1 Move Per Turn.")
+			sys.exit()
 		else:
 			print("Received Unknown Response: "+data)
 			sys.exit()
