@@ -11,10 +11,11 @@ import threading
 import json
 import urllib
 import random
+import sys
+import base64
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
-import sys
 from twisted.python import log
 from twisted.internet import reactor
 ## End WS ##
@@ -22,10 +23,10 @@ from twisted.internet import reactor
 ############################################ Socket Server ############################################
 
 API_URL = "http://battleship.purduehackers.com/api/"
-DEBUG_ENABLED = True
+DEBUG_ENABLED = False
 GAME_MODE = 0 # 0 = Normal, 1 = Random, 2 = Tournament
 DEFAULT_DELAY_LENGTH = 0.2
-MOVE_TIMEOUT = 100
+MOVE_TIMEOUT = 10
 PORT_GAME_SERVER = 23345
 PORT_GAME_LISTENER = 23346
 
@@ -226,10 +227,11 @@ class BattleshipGame(threading.Thread):
 			self.sendMsgP(p,"Miss")
 			hitResult = "Miss"
 
+		self.setReady(p)
+
 		for listener in self.listeners: # Notify GameViewer
 			listener.sendMsg("M|"+playerObj[0]+"|"+str(c1[0])+"|"+str(c1[1])+"|"+hitResult)
 
-		self.setReady(p)
 		return True
 
 	def checkGame(self):
@@ -300,16 +302,16 @@ class BattleshipGame(threading.Thread):
 
 class GameViewer(WebSocketServerProtocol):
 
-	QUEUED_WRITE_DELAY = 0.00001
-
 	def onConnect(self, request):
 		self.currentGame = -1
+		self.lock = threading.Lock()
 
 	def onOpen(self):
 		self.currentGame = -1
 
 	def sendMsg(self, msg):
-		self.sendMessage(msg, False)
+		with self.lock:
+			self.sendMessage(msg, False)
 
 	def onMessage(self, payload, isBinary):
 		global games, tournamentPairings, DEFAULT_DELAY_LENGTH, GAME_MODE
@@ -489,8 +491,9 @@ if __name__ == "__main__":
 	t.start()
 
 	########## Start Web Sockets ##########
-	# log.startLogging(sys.stdout)
-	factory = WebSocketServerFactory(u"ws://127.0.0.1:"+str(PORT_GAME_LISTENER), debug=False)
+	if DEBUG_ENABLED:
+		log.startLogging(sys.stdout)
+	factory = WebSocketServerFactory(u"ws://127.0.0.1:"+str(PORT_GAME_LISTENER), debug=DEBUG_ENABLED)
 	factory.protocol = GameViewer
 	# factory.setProtocolOptions(maxConnections=2)
 	reactor.listenTCP(PORT_GAME_LISTENER, factory)

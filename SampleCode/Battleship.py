@@ -34,7 +34,7 @@ def placeShips(opponentID):
 
 def makeMove():
 	global grid
-	for x in range(0,8):
+	for x in range(0,8): # Loop Till Find Square that has not been hit
 		for y in range(0,8):
 			if grid[x][y] == -1:
 				wasHitSunkOrMiss = placeMove(letters[x]+str(y)) # placeMove(LetterNumber) - Example: placeMove(D5)
@@ -52,7 +52,6 @@ def sendMsg(msg):
 	global s
 	try:
 		s.send(msg)
-		print("Sent:"+msg)
 	except:
 		s = None
 
@@ -94,8 +93,6 @@ def gameMain():
 		if not data:
 			s.close()
 			return
-
-		print("Received:"+data)
 		
 		if "Welcome" in data: # "Welcome To Battleship! You Are Playing:xxxx"
 			welcomeMsg = data.split(":")
