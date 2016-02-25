@@ -17,7 +17,6 @@ $(document).ready(function() {
 	if ("WebSocket" in window) {
 		ws = new WebSocket(GAME_SERVER);
 		window.setInterval(updateGamesList, 3000);
-		window.setInterval(sendMsgToGetMessages, 200); // TODO: Fix this shitty solution to fix message receive rate
 		
 		ws.onopen = function() {
 			console.log("Connected");
@@ -58,11 +57,6 @@ function sendMsgToServer(msg) {
 	if(ws != null) {
 		ws.send(msg);
 	}
-}
-
-// TODO: Fix this shitty solution to fix message receive rate
-function sendMsgToGetMessages() {
-	sendMsgToServer("hi");
 }
 
 // Request updated games list
