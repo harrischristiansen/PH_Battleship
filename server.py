@@ -12,7 +12,6 @@ import json
 import urllib
 import random
 import sys
-import base64
 ########## Start Web Sockets ##########
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
