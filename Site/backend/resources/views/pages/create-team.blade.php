@@ -3,10 +3,8 @@
 @section("content")
 
 <div class="container">
+	<h1>Create Team</h1>
 	<div class="panel panel-default">
-		<div class="panel-heading">
-	    	<h3 class="panel-title">Create Team</h3>
-		</div>
 		<form method="post" action="/create-team" class="panel-body">
 			{!! csrf_field() !!}
 			<input type="text" name="teamName" id="teamName" placeholder="Team Name" class="form-control">

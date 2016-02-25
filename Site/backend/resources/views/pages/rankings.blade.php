@@ -3,15 +3,16 @@
 @section("content")
 <div class="container">
 	<h1>Rankings</h1>
-	<table class="table table-bordered" >
+	<div class="panel panel-default">
+	<table class="table table-bordered panel-body" >
 	<thead>
-	  <tr>
-	     <th>name</th>
-	     <th>games</th>
-	     <th>wins</th>
-	     <th>win percent</th>
-	     <th>edit, reset, delete</th>
-	  </tr>
+		<tr>
+			<th>name</th>
+			<th>games</th>
+			<th>wins</th>
+			<th>win percent</th>
+			<th>edit, reset, delete</th>
+		</tr>
 	</thead>
 	@foreach ($rankings as $team)
 	    <tr>
@@ -23,5 +24,6 @@
 	    </tr>
 	@endforeach
 	</table>
+	</div>
 </div>
 @stop

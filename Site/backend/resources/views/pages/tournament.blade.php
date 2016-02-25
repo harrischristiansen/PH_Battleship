@@ -7,10 +7,8 @@
 @section("content")
 
 <div class="container">
+	<h1>Manage Tournament</h1>
 	<div class="panel panel-default">
-		<div class="panel-heading">
-	    	<h3 class="panel-title">Manage Tournament</h3>
-		</div>
 		<div class="panel-body form-horizontal">
 			<div class="form-group">
 			    <label for="gameMode" class="col-sm-2 control-label">Tournament Mode</label>
