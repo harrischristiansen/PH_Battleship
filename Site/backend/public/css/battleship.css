@@ -51,24 +51,41 @@ body {
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+.titlePageText {
+  color: #888888;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
 
-.enterViewerLink {
+.titlePageLink {
 	font-size: 18px;
 	color: #333333;
 	text-decoration: none;
-  font-weight: 400;
-  background-color: #BEBEBE;
-  padding: 10px 14px;
-  border-radius: 4px;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: all 0.1s ease;
+	font-weight: 400;
+	background-color: #BEBEBE;
+	padding: 10px 14px;
+	border-radius: 4px;
+	color: white;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	transition: all 0.1s ease;
 }
-.enterViewerLink:hover {
+.titlePageLink:hover {
   text-decoration: none;
   color: white;
   background-color: #345A6C;
+}
+
+/* ------------------------ Leaderboard ------------------------- */
+
+.leaderboardTable {
+	text-align: left;
+}
+
+.leaderboardTable td:first-child, .leaderboardTable th:first-child {
+	text-align: center;
+	width: 100px;
 }
 
 /* ------------------------ Sidebar ------------------------- */

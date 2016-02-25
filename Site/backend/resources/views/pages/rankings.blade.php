@@ -15,7 +15,6 @@
 	</thead>
 	@foreach ($rankings as $team)
 	    <tr>
-	<!--     	<td>{{$team['id']}}</td> -->
 	        <td>{{$team['abb']}}: {{$team['name']}}</td>
 	    	<td>{{$team['games']}}</td>
 	    	<td>{{$team['wins']}}</td>

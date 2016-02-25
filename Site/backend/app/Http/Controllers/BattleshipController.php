@@ -16,6 +16,22 @@ class BattleshipController extends Controller {
     public function getIndex() {
 		return view('pages.home');
 	}
+    
+    public function getWifi() {
+		return view('pages.wifi');
+	}
+
+	public function getLeaderboard() {
+		$rankings = DB::table('teams')
+                 ->select(DB::raw('*, (wins / games) as win_percent'))
+                 ->orderBy('win_percent','DESC')
+                 ->take(10)
+                 ->get();
+
+        $rankings = $array = json_decode(json_encode($rankings), true);
+        return view('pages.leaderboard',compact('rankings'));
+
+	}
 	
 	public function getLogin() {
 		return view('pages.login');

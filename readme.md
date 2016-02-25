@@ -6,10 +6,8 @@ TODO
 
 Anyone:  
 1. Projector Page (Logo, Anvil Wifi Info, URL To Download Starter Code)  
-2. Nice Top 8 Leaderboard  
-3. Starter Code  
+2. Starter Code  
   - C  
-  - Seperate Code into 2 files, one containing placeShips and makeMove methods, other containing everything else (makes less scary)   
 
 Dev Environment Setup Instructions
 -----------
