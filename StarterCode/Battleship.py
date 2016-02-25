@@ -22,7 +22,7 @@ grid = [[-1 for x in range(8)] for x in range(8)] # Fill Grid With -1s
 def placeShips(opponentID):
 	global grid
 	# Fill Grid With -1s
-	grid = [[-1 for x in range(8)] for x in range(8)]
+	grid = [[-1 for x in range(8)] for x in range(8)] # Fill Grid With -1s
 
 	# Place Ships
 	placeDestroyer("A0","A1")
