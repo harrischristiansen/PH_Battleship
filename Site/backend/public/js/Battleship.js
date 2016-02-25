@@ -5,7 +5,7 @@
 	Battleship Game Viewer
 */
 
-var GAME_SERVER = "ws://127.0.0.1:23346";
+var GAME_SERVER = "ws://battleshipgs.purduehackers.com:23346";
 
 var ws = null;
 
@@ -138,8 +138,6 @@ function setGameBoards(data) { // data = [player1ID,player1Wins,player1Board,pla
 			}
 		}
 	}
-	
-	console.log("Setting Board");
 }
 
 // Updates Boards After Each Move
