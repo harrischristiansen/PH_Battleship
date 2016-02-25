@@ -459,6 +459,8 @@ def startGameThread():
 			startMatch(player1, player2)
 		elif GAME_MODE == 1: # Random Mode
 			while(len(freePlayers)<4):
+				if GAME_MODE != 1:
+					break
 				time.sleep(0.1)
 				continue
 			random.shuffle(freePlayers)
