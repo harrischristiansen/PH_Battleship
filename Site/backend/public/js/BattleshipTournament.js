@@ -5,7 +5,7 @@
 	Battleship: Manage Tournament Client
 */
 
-var GAME_SERVER = "ws://127.0.0.1:23346";
+var GAME_SERVER = "ws://battleshipgs.purduehackers.com:23346";
 
 var ws = null;
 
