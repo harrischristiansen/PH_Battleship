@@ -13,39 +13,18 @@ import java.net.InetAddress;
 import java.lang.Thread;
 
 public class Battleship {
-	public static String API_KEY = "API_KEY_HERE"; // TODO: PUT YOUT CODE HERE
+	public static String API_KEY = "API_KEY_HERE"; ///////// PUT YOUR API KEY HERE /////////
 	public static String GAME_SERVER = "battleshipgs.purduehackers.com";
 
-	/*
-	 * TODO: PUT YOUR CODE HERE
-	 */
+	//////////////////////////////////////  PUT YOUR CODE HERE //////////////////////////////////////
 
 	char[] letters;
 	int[][] grid;
-	Socket socket;
-	String[] destroyer, submarine, cruiser, battleship, carrier;
-
-	String dataPassthrough;
-	String data;
-	BufferedReader br;
-	PrintWriter out;
-
-	public Battleship() {
-		this.grid = new int[8][8];
-		for(int i = 0; i < grid.length; i++) { for(int j = 0; j < grid[i].length; j++) grid[i][j] = -1; }
-		this.letters = new char[] {'A','B','C','D','E','F','G','H'};
-
-		destroyer = new String[] {"A0", "A0"};
-		submarine = new String[] {"A0", "A0"};
-		cruiser = new String[] {"A0", "A0"};
-		battleship = new String[] {"A0", "A0"};
-		carrier = new String[] {"A0", "A0"};
-	}
 
 	void placeShips(String opponentID) {
-		// Fill Grid With -s
+		// Fill Grid With -1s
 		for(int i = 0; i < grid.length; i++) { for(int j = 0; j < grid[i].length; j++) grid[i][j] = -1; }
-		System.out.println(grid[0][0]);
+
 		// Place Ships
 		placeDestroyer("A0", "A1");
 		placeSubmarine("B0", "B2");
@@ -58,9 +37,8 @@ public class Battleship {
 		for(int i = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++) {
 				if (this.grid[i][j] == -1) {
-					String wasHitSunkOrMiss = placeMove(this.letters[i] + 
-							String.valueOf(j));
-					// placeMove(LetterNumber) Ex. placeMove(D5);
+					String wasHitSunkOrMiss = placeMove(this.letters[i] + String.valueOf(j));
+
 					if (wasHitSunkOrMiss.equals("Hits") || 
 							wasHitSunkOrMiss.equals("Sunk")) {
 						this.grid[i][j] = 1;
@@ -73,9 +51,28 @@ public class Battleship {
 		}
 	}
 
-	/*
-	 * TODO: PUT YOUR CODE ABOVE HERE
-	 */
+	////////////////////////////////////// ^^^^^ PUT YOUR CODE ABOVE HERE ^^^^^ //////////////////////////////////////
+
+	Socket socket;
+	String[] destroyer, submarine, cruiser, battleship, carrier;
+
+	String dataPassthrough;
+	String data;
+	BufferedReader br;
+	PrintWriter out;
+	Boolean moveMade = False;
+
+	public Battleship() {
+		this.grid = new int[8][8];
+		for(int i = 0; i < grid.length; i++) { for(int j = 0; j < grid[i].length; j++) grid[i][j] = -1; }
+		this.letters = new char[] {'A','B','C','D','E','F','G','H'};
+
+		destroyer = new String[] {"A0", "A0"};
+		submarine = new String[] {"A0", "A0"};
+		cruiser = new String[] {"A0", "A0"};
+		battleship = new String[] {"A0", "A0"};
+		carrier = new String[] {"A0", "A0"};
+	}
 
 	void connectToServer() {
 		try {
@@ -95,6 +92,7 @@ public class Battleship {
 		if (data == null || data.contains("False")) {
 			socket = null;
 			System.out.println("Invalid API_KEY");
+			System.exit(1); // Close Client
 		}
 	}
 
@@ -102,15 +100,11 @@ public class Battleship {
 
 	public void gameMain() {
 		while(true) {
-			System.out.println("every round");
 			try {
-				System.out.println("Getting data...");
 				if (this.dataPassthrough == null) {
-					System.out.println("When dataPassThrough is null, getting data...");
 					this.data = this.br.readLine();
 				}
 				else {
-					System.out.println("dataPassThrough is passing data to data...");
 					this.data = this.dataPassthrough;
 					this.dataPassthrough = null;
 				}
@@ -127,52 +121,41 @@ public class Battleship {
 			if (data.contains("Welcome")) {
 				String[] welcomeMsg = this.data.split(":");
 				placeShips(welcomeMsg[1]);
-				System.out.println("Placed Ships");
 				if (data.contains("Destroyer")) { // Only Place Can Receive Double Message, Pass Through
 					this.dataPassthrough = "Destroyer(2):";
 				}
-			}
-			else if (data.contains("Destroyer")) {
+			} else if (data.contains("Destroyer")) {
 				this.out.print(destroyer[0]);
 				this.out.print(destroyer[1]);
 				out.flush();
-				System.out.println("Sent Destroyers");
-			}
-			else if (data.contains("Submarine")) {
+			} else if (data.contains("Submarine")) {
 				this.out.print(submarine[0]);
 				this.out.print(submarine[1]);
 				out.flush();
-				System.out.println("Sent Submarines");
-			}
-			else if (data.contains("Cruiser")) {
+			} else if (data.contains("Cruiser")) {
 				this.out.print(cruiser[0]);
 				this.out.print(cruiser[1]);
 				out.flush();
-				System.out.println("Sent Cruisers");
-			}
-			else if (data.contains("Battleship")) {
+			} else if (data.contains("Battleship")) {
 				this.out.print(battleship[0]);
 				this.out.print(battleship[1]);
 				out.flush();
-				System.out.println("Sent Battlehsips");
-			}
-			else if (data.contains("Carrier")) {
+			} else if (data.contains("Carrier")) {
 				this.out.print(carrier[0]);
 				this.out.print(carrier[1]);
 				out.flush();
-				System.out.println("Sent Carriers");
-			}
-			else if (data.contains( "Enter")) {
+			} else if (data.contains( "Enter")) {
+				this.moveMade = False;
 				this.makeMove();
-				System.out.println("Made Move");
-			}
-			else if (data.contains("Error" )) {
-				System.out.println("Received Error: " + data);
+			} else if (data.contains("Error" )) {
+				System.out.println("Error: " + data);
 				System.exit(1); // Exit sys when there is an error
-			}
-			else {
-				System.out.println("Recieved Unknown Responce:" + data);
-				System.exit(1); // Exit sys when there is an unknown responce
+			} else if (data.contains("Die" )) {
+				System.out.println("Error: Your client was disconnected using the Game Viewer.");
+				System.exit(1); // Close Client
+			} else {
+				System.out.println("Recieved Unknown Response:" + data);
+				System.exit(1); // Exit sys when there is an unknown response
 			}
 		}
 	}
@@ -198,6 +181,12 @@ public class Battleship {
 	}
 
 	String placeMove(String pos) {
+		if(this.moveMade) { // Check if already made move this turn
+			System.out.println("Error: Please Make Only 1 Move Per Turn.");
+			System.exit(1); // Close Client
+		}
+		this.moveMade = True;
+
 		this.out.print(pos);
 		out.flush();
 		try { data = this.br.readLine(); } 
