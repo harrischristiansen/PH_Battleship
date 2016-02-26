@@ -139,7 +139,7 @@ function updateGameBoards(player,letter,number,moveResult) { // moveResult will 
 	letter = parseInt(letter);
 	number = parseInt(number);
 	
-	if(player==player1) {
+	if(player==player2) {
 		var currentNum = $("#player1Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
 		var newNum = 0 - Math.abs(parseInt(currentNum));
 		$("#player1Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
@@ -148,7 +148,7 @@ function updateGameBoards(player,letter,number,moveResult) { // moveResult will 
 		} else if(moveResult == "Miss") {
 			$("#player1 tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").attr('class', 'status-miss');
 		}
-	} else if(player==player2) {
+	} else if(player==player1) {
 		var currentNum = $("#player2Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text();
 		var newNum = 0 - Math.abs(parseInt(currentNum));
 		$("#player2Raw tr:nth-child("+(letter+1)+") td:nth-child("+(number+2)+")").text(newNum);
