@@ -176,17 +176,24 @@ body {
   color: #345A6C;
 }
 
-#delayPicker {
+#gameHeadFloatRight {
 	float: right;
+	margin-top: -6px;
+}
+
+#killBtn {
+	display: inline;
+	margin-left: 5px;
+}
+
+#delayPicker {
+	display: inline;
 	font-size: 0.8em;
-	margin-top: 3px;
 }
 
 #delayPickerSelect {
 	display: inline;
-	float: right;
 	width: 200px;
-	margin-top: -7px;
 }
 
 .main .table {

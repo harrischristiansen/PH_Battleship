@@ -16,15 +16,18 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<h1>
 		<span class="player1ID">Player 1</span> vs <span class="player2ID">Player 2</span>
-		<div id="delayPicker">Move Delay:
-			<select id="delayPickerSelect" class="form-control" onchange="setDelay(this.value)">
-				<option value="DoNothing"> - Select - </option>
-				<option value="0.002">None</option>
-				<option value="0.2">0.2 Seconds</option>
-				<option value="1.0">1 Second</option>
-				<option value="2.0">2 Seconds</option>
-				<option value="4.0">4 Seconds</option>
-			</select>
+		<div id="gameHeadFloatRight">
+			<div id="delayPicker">Move Delay:
+				<select id="delayPickerSelect" class="form-control" onchange="setDelay(this.value)">
+					<option value="DoNothing"> - Select - </option>
+					<option value="0.002">None</option>
+					<option value="0.2">0.2 Seconds</option>
+					<option value="1.0">1 Second</option>
+					<option value="2.0">2 Seconds</option>
+					<option value="4.0">4 Seconds</option>
+				</select>
+			</div>
+			<button href="#" class="btn btn-danger" id="killBtn" onclick="dcPlayers();">Kill</button>
 		</div>
 	</h1>
 

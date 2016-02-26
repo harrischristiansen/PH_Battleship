@@ -10,7 +10,8 @@ import sys
 import socket
 import time
 
-API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
+#API_KEY = "API_KEY_HERE" ########## PUT YOUR API KEY HERE ##########
+API_KEY = sys.argv[1]
 
 GAME_SERVER = "battleshipgs.purduehackers.com"
 
@@ -123,7 +124,7 @@ def gameMain():
 			print("Error: Please Make Only 1 Move Per Turn.")
 			sys.exit()
 		elif "Die" in data:
-			print("Error: Your client was disconnected using the GameViewer")
+			print("Error: Your client was disconnected using the Game Viewer.")
 			sys.exit()
 		else:
 			print("Received Unknown Response: "+data)

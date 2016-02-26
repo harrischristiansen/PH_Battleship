@@ -64,6 +64,11 @@ function updateGamesList() {
 	sendMsgToServer("games");
 }
 
+// Disconnect players in current game from server
+function dcPlayers() {
+	sendMsgToServer("dcPlayers");
+}
+
 // Update Games List after response
 function updateGamesListFromData(data) {
 	var games = JSON.parse(data);

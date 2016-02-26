@@ -360,6 +360,12 @@ class GameViewer(WebSocketServerProtocol):
 						None
 					break
 
+		elif "dcPlayers" in data:
+			for game in games:
+				if(game._Thread__ident == self.currentGame):
+					game.sendMsg("Die")
+					break
+
 		elif "mode" in data:
 			tournamentPairings = []
 			try:
