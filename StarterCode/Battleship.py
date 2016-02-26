@@ -25,11 +25,11 @@ def placeShips(opponentID):
 	grid = [[-1 for x in range(8)] for x in range(8)] # Fill Grid With -1s
 
 	# Place Ships
-	placeDestroyer("A0","A1")
-	placeSubmarine("B0","B2")
-	placeCruiser("C0","C2")
-	placeBattleship("D0","D3")
-	placeCarrier("E0","E4")
+	placeDestroyer("A0","A1") # Ship Length = 2
+	placeSubmarine("B0","B2") # Ship Length = 3
+	placeCruiser("C0","C2") # Ship Length = 3
+	placeBattleship("D0","D3") # Ship Length = 4
+	placeCarrier("E0","E4") # Ship Length = 5
 
 def makeMove():
 	global grid
