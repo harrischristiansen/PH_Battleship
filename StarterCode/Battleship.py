@@ -170,6 +170,6 @@ while True:
 	if s != None:
 		try:
 			gameMain()
-		except socket_error as serr:
+		except socket.error, msg:
 			None
 	time.sleep(1)
