@@ -79,7 +79,7 @@ destroyer=submarine=cruiser=battleship=carrier=("A0","A0")
 dataPassthrough = None
 
 def gameMain():
-	global s, dataPassthrough
+	global s, dataPassthrough, moveMade
 	while True:
 		if(dataPassthrough == None):
 			if s == None:
@@ -114,6 +114,7 @@ def gameMain():
 			sendMsg(carrier[0])
 			sendMsg(carrier[1])
 		elif "Enter" in data: # Enter Coordinates
+			moveMade = False
 			makeMove()
 		elif "Error" in data: # Error: xxx
 			print("Received Error: "+data)
@@ -146,7 +147,12 @@ def placeCarrier(startPos, endPos):
 	carrier = (startPos.upper(), endPos.upper())
 
 def placeMove(pos):
-	global dataPassthrough
+	global dataPassthrough, moveMade
+	if moveMade: # Only Make 1 Move Per Turn
+		print("Error: Your client was disconnected using the GameViewer")
+		sys.exit()
+
+	moveMade = True
 	sendMsg(pos)
 	data = s.recv(1024)
 	if "Hit" in data:
