@@ -159,5 +159,8 @@ def placeMove(pos):
 while True:
 	connectToServer()
 	if s != None:
-		gameMain()
+		try:
+			gameMain()
+		except socket_error as serr:
+			None
 	time.sleep(1)
