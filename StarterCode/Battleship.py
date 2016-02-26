@@ -121,6 +121,9 @@ def gameMain():
 		elif "Hit" in data or "Miss" in data or "Sunk" in data:
 			print("Error: Please Make Only 1 Move Per Turn.")
 			sys.exit()
+		elif "Die" in data:
+			print("Error: Your client was disconnected using the GameViewer")
+			sys.exit()
 		else:
 			print("Received Unknown Response: "+data)
 			sys.exit()
