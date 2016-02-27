@@ -60,7 +60,7 @@ public class Battleship {
 	String data;
 	BufferedReader br;
 	PrintWriter out;
-	Boolean moveMade = False;
+	Boolean moveMade = false;
 
 	public Battleship() {
 		this.grid = new int[8][8];
@@ -145,7 +145,7 @@ public class Battleship {
 				this.out.print(carrier[1]);
 				out.flush();
 			} else if (data.contains( "Enter")) {
-				this.moveMade = False;
+				this.moveMade = false;
 				this.makeMove();
 			} else if (data.contains("Error" )) {
 				System.out.println("Error: " + data);
@@ -185,7 +185,7 @@ public class Battleship {
 			System.out.println("Error: Please Make Only 1 Move Per Turn.");
 			System.exit(1); // Close Client
 		}
-		this.moveMade = True;
+		this.moveMade = true;
 
 		this.out.print(pos);
 		out.flush();
