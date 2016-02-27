@@ -39,8 +39,7 @@ public class Battleship {
 				if (this.grid[i][j] == -1) {
 					String wasHitSunkOrMiss = placeMove(this.letters[i] + String.valueOf(j));
 
-					if (wasHitSunkOrMiss.equals("Hits") || 
-							wasHitSunkOrMiss.equals("Sunk")) {
+					if (wasHitSunkOrMiss.equals("Hit") || wasHitSunkOrMiss.equals("Sunk")) {
 						this.grid[i][j] = 1;
 					} else {
 						this.grid[i][j] = 0;			
@@ -193,7 +192,7 @@ public class Battleship {
 		catch(Exception e) { System.out.println("No response after from the server after place the move"); }
 
 		if (data.contains("Hit")) return "Hit";
-		else if (data.contains("Sunk")) return "Sun";
+		else if (data.contains("Sunk")) return "Sunk";
 		else if (data.contains("Miss")) return "Miss";
 		else {
 			this.dataPassthrough = data;
