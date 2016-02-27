@@ -27,7 +27,9 @@
 					<option value="4.0">4 Seconds</option>
 				</select>
 			</div>
+			@if(session()->get('loggedIn') == "true")
 			<button href="#" class="btn btn-danger" id="killBtn" onclick="dcPlayers();">Kill</button>
+			@endif
 		</div>
 	</h1>
 

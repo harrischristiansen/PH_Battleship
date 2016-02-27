@@ -51,8 +51,11 @@
 			</div>
 		</nav>
 		@endif
-		
+		@if(Request::url() == 'http://battleship.purduehackers.com/game')
 		<div class="container-fluid mainContentContainer">
+		@else
+		<div class="container-fluid">
+		@endif
 			@if(session()->get('loggedIn') == "true" && Request::path() != "game")
 				<br>
 			@endif
