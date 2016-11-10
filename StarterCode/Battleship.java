@@ -120,7 +120,7 @@ public class Battleship {
 			if (data.contains("Welcome")) {
 				String[] welcomeMsg = this.data.split(":");
 				placeShips(welcomeMsg[1]);
-				if (data.contains("Destroyer")) { // Only Place Can Recieve Double Message, Pass Through
+				if (data.contains("Destroyer")) { // Only Place Can Receive Double Message, Pass Through
 					this.dataPassthrough = "Destroyer(2):";
 				}
 			} else if (data.contains("Destroyer")) {
