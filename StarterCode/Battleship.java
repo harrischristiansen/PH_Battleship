@@ -120,7 +120,7 @@ public class Battleship {
 			if (data.contains("Welcome")) {
 				String[] welcomeMsg = this.data.split(":");
 				placeShips(welcomeMsg[1]);
-				if (data.contains("Destroyer")) { // Only Place Can Receive Double Message, Pass Through
+				if (data.contains("Destroyer")) { // Only Place Can Recieve Double Message, Pass Through
 					this.dataPassthrough = "Destroyer(2):";
 				}
 			} else if (data.contains("Destroyer")) {
@@ -153,7 +153,7 @@ public class Battleship {
 				System.out.println("Error: Your client was disconnected using the Game Viewer.");
 				System.exit(1); // Close Client
 			} else {
-				System.out.println("Recieved Unknown Response:" + data);
+				System.out.println("Received Unknown Response:" + data);
 				System.exit(1); // Exit sys when there is an unknown response
 			}
 		}
