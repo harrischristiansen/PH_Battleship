@@ -153,7 +153,7 @@ public class Battleship {
 				System.out.println("Error: Your client was disconnected using the Game Viewer.");
 				System.exit(1); // Close Client
 			} else {
-				System.out.println("Recieved Unknown Response:" + data);
+				System.out.println("Received Unknown Response:" + data);
 				System.exit(1); // Exit sys when there is an unknown response
 			}
 		}
