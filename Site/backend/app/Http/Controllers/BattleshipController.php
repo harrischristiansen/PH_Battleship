@@ -25,10 +25,9 @@ class BattleshipController extends Controller {
 		$rankings = DB::table('teams')
                  ->select(DB::raw('*, (wins / games) as win_percent'))
                  ->orderBy('win_percent','DESC')
-                 ->take(10)
                  ->get();
 
-        $rankings = $array = json_decode(json_encode($rankings), true);
+        $rankings = json_decode(json_encode($rankings), true);
         return view('pages.leaderboard',compact('rankings'));
 
 	}

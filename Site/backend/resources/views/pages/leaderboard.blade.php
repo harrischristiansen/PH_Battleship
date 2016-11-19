@@ -1,24 +1,27 @@
 @extends("app")
 
 @section("content")
-
-<div class="titlePage row">
-	<h1 class="titlePageTitle">Battleship</h1>
-	<p class="titlePageSub">Leaderboard</p>
-	<br><br><br>
-	<div class="container">
-		<div class="panel panel-default">
-			<table class="table panel-body leaderboardTable">
-				<thead>
-					<tr><th>#</th><th>Team</th></tr>
-				</thead>
-				<tbody>
-					@foreach ($rankings as $team)
-					<tr><td>{{ array_search($team,$rankings)+1 }}</td><td>{{ $team['name'] }}</td></tr>
-					@endforeach
-				</tbody>
-			</table>
-		</div>
+<div class="container">
+	<h1>Rankings</h1>
+	<div class="panel panel-default">
+	<table class="table table-bordered panel-body" >
+	<thead>
+		<tr>
+			<th>name</th>
+			<th>games</th>
+			<th>wins</th>
+			<th>win percent</th>
+		</tr>
+	</thead>
+	@foreach ($rankings as $team)
+	    <tr>
+	        <td>{{$team['abb']}}: {{$team['name']}}</td>
+	    	<td>{{$team['games']}}</td>
+	    	<td>{{$team['wins']}}</td>
+	        <td>{{$team['win_percent']*100}}%</td>
+	    </tr>
+	@endforeach
+	</table>
 	</div>
 </div>
 
